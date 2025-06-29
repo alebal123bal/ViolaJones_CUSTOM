@@ -7,6 +7,9 @@ import os
 import numpy as np
 from PIL import Image
 
+FACE_PATH = "image_manager/training_set/face"
+NOT_FACE_PATH = "image_manager/training_set/not_face"
+
 
 def compute_integral_image(image):
     """
@@ -72,15 +75,10 @@ def compute_integral_images(images):
 
 # Test
 if __name__ == "__main__":
-    # Example usage
-    FACE_PATH = "image_manager/training_set/face"
-
     # load images from the specified folder
     imgs = load_images_from_folder(FACE_PATH)
 
     # Compute integrals
     intgr_imgs = compute_integral_images(images=imgs)
-
-    intgr_imgs[0]
 
     print(f"Loaded and computed {len(intgr_imgs)} integral images from {FACE_PATH}")
