@@ -104,13 +104,6 @@ if __name__ == "__main__":
     # Create the feature evaluation matrix
     mat, w, lab = get_matrix_weights_labels()
 
-    # Print the shape of the matrix
-    print(f"Feature evaluation matrix shape: {mat.shape}")
-
-    # Optionally, print the first few rows and columns
-    print("First 5 features for first 5 images:")
-    print(mat[:5, :5])
-
     # Save the matrix, weights, and labels to a file
     save_matrix_weights_labels(
         folder="matrix_creator/eval_matrix_weights_labels",
