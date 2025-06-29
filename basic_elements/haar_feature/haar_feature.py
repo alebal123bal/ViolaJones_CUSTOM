@@ -96,12 +96,14 @@ class HaarFeature:
         for rect in self.rectangles:
             rect.scale(scale)
 
-    def plot(self, grayscale_image=None):
+    def plot(self, grayscale_image=None, shift_x=0, shift_y=0):
         """
         Plot the Haar feature rectangles on a grid.
 
         Args:
             grayscale_image: Optional grayscale image to overlay rectangles on
+            shift_x: Horizontal offset for the Haar feature window (default: 0)
+            shift_y: Vertical offset for the Haar feature window (default: 0)
         """
         _, ax = plt.subplots()
 
@@ -110,18 +112,26 @@ class HaarFeature:
             height, width = grayscale_image.shape
             display_width, display_height = width, height
 
-            # Check if Haar feature window size is bigger than image dimensions
-            if self.window_size[0] > width or self.window_size[1] > height:
+            # Check if Haar feature window (with shift) fits within image dimensions
+            if (
+                shift_x + self.window_size[0] > width
+                or shift_y + self.window_size[1] > height
+                or shift_x < 0
+                or shift_y < 0
+            ):
                 raise ValueError(
-                    f"Haar feature window size ({self.window_size[0]}x{self.window_size[1]}) "
-                    f"is larger than image dimensions ({width}x{height})"
+                    f"Haar feature window at position ({shift_x}, {shift_y}) "
+                    f"with size ({self.window_size[0]}x{self.window_size[1]}) "
+                    f"doesn't fit within image dimensions ({width}x{height})"
                 )
         else:
-            display_width, display_height = self.window_size
+            # When no image, display area should accommodate window + shift
+            display_width = self.window_size[0] + shift_x
+            display_height = self.window_size[1] + shift_y
 
         # If a grayscale image is provided, display its numbers inside the grid squares
         if grayscale_image is not None:
-            # Display the image as background using its original dimensions
+            # Display the image as background using its original dimensions (STAYS FIXED)
             ax.imshow(
                 grayscale_image,
                 cmap="gray",
@@ -131,7 +141,7 @@ class HaarFeature:
                 vmax=255,
             )
 
-            # Add numeric values in each grid square
+            # Add numeric values in each grid square (BACKGROUND STAYS FIXED)
             for i in range(height):
                 for j in range(width):
                     ax.text(
@@ -145,10 +155,10 @@ class HaarFeature:
                         color="red",
                     )
 
-        # Draw the Haar feature window border in green (internal border)
+        # Draw the Haar feature window border in green (SHIFTED POSITION)
         border_thickness = 0.15  # How much to inset the border
         inner_border = plt.Rectangle(
-            (border_thickness, border_thickness),  # Start at top-left with small inset
+            (shift_x + border_thickness, shift_y + border_thickness),  # Apply shift
             self.window_size[0] - 2 * border_thickness,
             self.window_size[1] - 2 * border_thickness,
             edgecolor="Green",
@@ -157,10 +167,13 @@ class HaarFeature:
         )
         ax.add_patch(inner_border)
 
-        # Draw each rectangle with only borders (no fill)
+        # Draw each rectangle with only borders (SHIFTED POSITION)
         for rect in self.rectangles:
             rect_patch = plt.Rectangle(
-                (rect.x, rect.y),  # Use coordinates directly (no y adjustment needed)
+                (
+                    rect.x + shift_x,
+                    rect.y + shift_y,
+                ),  # Apply shift to rectangle position
                 rect.width,
                 rect.height,
                 edgecolor=("Yellow" if rect.sign == 1 else "Orange"),
@@ -173,7 +186,7 @@ class HaarFeature:
         ax.set_xlim(0, display_width)
         ax.set_ylim(display_height, 0)  # Flipped y-limits (max to 0)
         ax.set_aspect("equal")
-        ax.set_title(self.name)
+        ax.set_title(f"{self.name} (offset: {shift_x}, {shift_y})")
 
         # Configure grid to show 1 square per unit
         ax.set_xticks(range(display_width + 1))
@@ -215,9 +228,16 @@ if __name__ == "__main__":
 
     # Compute the integral image
     padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
-    intgr_image = np.cumsum(np.cumsum(padded, axis=0), axis=1)
+    intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
 
     # Evaluate the feature at position (0, 0)
     feat_val = haar_feature.evaluate(intgr_image, shift_x=0, shift_y=0)
 
     print(f"Feature value at (0, 0): {feat_val}")
+
+    # Scale and recenter the feature at (5, 5)
+    haar_feature.scale(0.5)
+    haar_feature.plot(grayscale_image=image, shift_x=5, shift_y=5)
+    feat_val_scaled = haar_feature.evaluate(intgr_image, shift_x=5, shift_y=5)
+
+    print(f"Feature value at {5, 5}: {feat_val_scaled}")
