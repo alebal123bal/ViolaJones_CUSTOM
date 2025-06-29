@@ -67,7 +67,7 @@ def get_matrix_weights_labels(haar_features=None, integral_images=None):
     # Labels
     labels = np.zeros(total_samples, dtype=np.int8)
     labels[:num_faces] = 1  # Faces labeled as 1
-    labels[num_faces:] = 0  # Non-faces labeled as 0
+    labels[num_faces:] = -1  # Non-faces labeled as -1
 
     return feature_eval_matrix, weights, labels
 
