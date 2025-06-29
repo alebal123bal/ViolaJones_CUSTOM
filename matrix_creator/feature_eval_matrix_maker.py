@@ -72,6 +72,33 @@ def get_matrix_weights_labels(haar_features=None, integral_images=None):
     return feature_eval_matrix, weights, labels
 
 
+def save_matrix_weights_labels(
+    folder="matrix_creator/eval_matrix_weights_labels",
+    matrix=None,
+    weights=None,
+    labels=None,
+):
+    """
+    Save the feature evaluation matrix, weights, and labels to a file as .npy.
+
+    Args:
+        folder (str): Folder path where the data will be saved.
+        haar_features (list, optional): List of Haar features to evaluate.
+        integral_images (list, optional): List of integral images to evaluate the features on.
+    """
+    import os
+
+    # Ensure the folder exists
+    os.makedirs(folder, exist_ok=True)
+
+    # Save the matrix, weights, and labels
+    np.save(os.path.join(folder, "feature_eval_matrix.npy"), matrix)
+    np.save(os.path.join(folder, "weights.npy"), weights)
+    np.save(os.path.join(folder, "labels.npy"), labels)
+
+    print(f"Saved feature evaluation matrix, weights, and labels to {folder}")
+
+
 # Example usage
 if __name__ == "__main__":
     # Create the feature evaluation matrix
@@ -83,3 +110,11 @@ if __name__ == "__main__":
     # Optionally, print the first few rows and columns
     print("First 5 features for first 5 images:")
     print(mat[:5, :5])
+
+    # Save the matrix, weights, and labels to a file
+    save_matrix_weights_labels(
+        folder="matrix_creator/eval_matrix_weights_labels",
+        matrix=mat,
+        weights=w,
+        labels=lab,
+    )
