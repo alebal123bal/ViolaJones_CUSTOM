@@ -1,4 +1,6 @@
 data_preprocess/
 image_manager/
 matrix_creator/
-viola_jones/"__pycache__/" 
+viola_jones/
+# Ignore Python cache files
+__pycache__/
