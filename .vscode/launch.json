@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Haar Feature",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "basic_elements.haar_feature.haar_feature",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Haar Feature",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "basic_elements.haar_feature.haar_feature",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
+        }
+    ]
+}
