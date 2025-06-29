@@ -22,16 +22,17 @@ def generate_two_rectangle_horizontal(
     features = []
     width, height = window_size
 
-    # Try different positions and sizes
-    for y in range(0, height - 1):  # -1 to ensure minimum height of 2
-        for x in range(0, width - 1):  # -1 to ensure minimum width of 2
-            for h in range(2, height - y + 1):  # Minimum height of 2
-                for w in range(2, width - x, 2):  # Even widths only, step by 2
-                    if x + w <= width:
-                        rect_width = w // 2
-                        rect1 = Rectangle(x, y, rect_width, h, +1)
-                        rect2 = Rectangle(x + rect_width, y, rect_width, h, -1)
-                        features.append(HaarFeature([rect1, rect2]))
+    for pol in (1, -1):
+        # Try different positions and sizes
+        for y in range(0, height - 1):  # -1 to ensure minimum height of 2
+            for x in range(0, width - 1):  # -1 to ensure minimum width of 2
+                for h in range(2, height - y + 1):  # Minimum height of 2
+                    for w in range(2, width - x, 2):  # Even widths only, step by 2
+                        if x + w <= width:
+                            rect_width = w // 2
+                            rect1 = Rectangle(x, y, rect_width, h, pol)
+                            rect2 = Rectangle(x + rect_width, y, rect_width, h, -pol)
+                            features.append(HaarFeature([rect1, rect2]))
 
     return features
 
@@ -51,15 +52,16 @@ def generate_two_rectangle_vertical(
     features = []
     width, height = window_size
 
-    for y in range(0, height - 1):
-        for x in range(0, width - 1):
-            for w in range(2, width - x + 1):  # Minimum width of 2
-                for h in range(2, height - y, 2):  # Even heights only, step by 2
-                    if y + h <= height:
-                        rect_height = h // 2
-                        rect1 = Rectangle(x, y, w, rect_height, +1)
-                        rect2 = Rectangle(x, y + rect_height, w, rect_height, -1)
-                        features.append(HaarFeature([rect1, rect2]))
+    for pol in (1, -1):
+        for y in range(0, height - 1):
+            for x in range(0, width - 1):
+                for w in range(2, width - x + 1):  # Minimum width of 2
+                    for h in range(2, height - y, 2):  # Even heights only, step by 2
+                        if y + h <= height:
+                            rect_height = h // 2
+                            rect1 = Rectangle(x, y, w, rect_height, pol)
+                            rect2 = Rectangle(x, y + rect_height, w, rect_height, -pol)
+                            features.append(HaarFeature([rect1, rect2]))
 
     return features
 
@@ -79,16 +81,19 @@ def generate_three_rectangle_horizontal(
     features = []
     width, height = window_size
 
-    for y in range(0, height - 1):
-        for x in range(0, width - 2):  # -2 to ensure minimum width of 3
-            for h in range(2, height - y + 1):
-                for w in range(3, width - x, 3):  # Widths divisible by 3, step by 3
-                    if x + w <= width:
-                        rect_width = w // 3
-                        rect1 = Rectangle(x, y, rect_width, h, +1)
-                        rect2 = Rectangle(x + rect_width, y, rect_width, h, -1)
-                        rect3 = Rectangle(x + 2 * rect_width, y, rect_width, h, +1)
-                        features.append(HaarFeature([rect1, rect2, rect3]))
+    for pol in (1, -1):
+        for y in range(0, height - 1):
+            for x in range(0, width - 2):  # -2 to ensure minimum width of 3
+                for h in range(2, height - y + 1):
+                    for w in range(3, width - x, 3):  # Widths divisible by 3, step by 3
+                        if x + w <= width:
+                            rect_width = w // 3
+                            rect1 = Rectangle(x, y, rect_width, h, pol)
+                            rect2 = Rectangle(x + rect_width, y, rect_width, h, -pol)
+                            rect3 = Rectangle(
+                                x + 2 * rect_width, y, rect_width, h, +pol
+                            )
+                            features.append(HaarFeature([rect1, rect2, rect3]))
 
     return features
 
@@ -108,16 +113,21 @@ def generate_three_rectangle_vertical(
     features = []
     width, height = window_size
 
-    for y in range(0, height - 2):  # -2 to ensure minimum height of 3
-        for x in range(0, width - 1):
-            for w in range(2, width - x + 1):
-                for h in range(3, height - y, 3):  # Heights divisible by 3, step by 3
-                    if y + h <= height:
-                        rect_height = h // 3
-                        rect1 = Rectangle(x, y, w, rect_height, +1)
-                        rect2 = Rectangle(x, y + rect_height, w, rect_height, -1)
-                        rect3 = Rectangle(x, y + 2 * rect_height, w, rect_height, +1)
-                        features.append(HaarFeature([rect1, rect2, rect3]))
+    for pol in (1, -1):
+        for y in range(0, height - 2):  # -2 to ensure minimum height of 3
+            for x in range(0, width - 1):
+                for w in range(2, width - x + 1):
+                    for h in range(
+                        3, height - y, 3
+                    ):  # Heights divisible by 3, step by 3
+                        if y + h <= height:
+                            rect_height = h // 3
+                            rect1 = Rectangle(x, y, w, rect_height, pol)
+                            rect2 = Rectangle(x, y + rect_height, w, rect_height, -pol)
+                            rect3 = Rectangle(
+                                x, y + 2 * rect_height, w, rect_height, pol
+                            )
+                            features.append(HaarFeature([rect1, rect2, rect3]))
 
     return features
 
@@ -137,26 +147,33 @@ def generate_four_rectangle_diagonal(
     features = []
     width, height = window_size
 
-    for y in range(0, height - 1):
-        for x in range(0, width - 1):
-            for h in range(2, height - y, 2):  # Even heights only
-                for w in range(2, width - x, 2):  # Even widths only
-                    if x + w <= width and y + h <= height:
-                        rect_width = w // 2
-                        rect_height = h // 2
+    for pol in (1, -1):
+        for y in range(0, height - 1):
+            for x in range(0, width - 1):
+                for h in range(2, height - y, 2):  # Even heights only
+                    for w in range(2, width - x, 2):  # Even widths only
+                        if x + w <= width and y + h <= height:
+                            rect_width = w // 2
+                            rect_height = h // 2
 
-                        rect1 = Rectangle(x, y, rect_width, rect_height, +1)  # Top-left
-                        rect2 = Rectangle(
-                            x + rect_width, y, rect_width, rect_height, -1
-                        )  # Top-right
-                        rect3 = Rectangle(
-                            x, y + rect_height, rect_width, rect_height, -1
-                        )  # Bottom-left
-                        rect4 = Rectangle(
-                            x + rect_width, y + rect_height, rect_width, rect_height, +1
-                        )  # Bottom-right
+                            rect1 = Rectangle(
+                                x, y, rect_width, rect_height, pol
+                            )  # Top-left
+                            rect2 = Rectangle(
+                                x + rect_width, y, rect_width, rect_height, -pol
+                            )  # Top-right
+                            rect3 = Rectangle(
+                                x, y + rect_height, rect_width, rect_height, -pol
+                            )  # Bottom-left
+                            rect4 = Rectangle(
+                                x + rect_width,
+                                y + rect_height,
+                                rect_width,
+                                rect_height,
+                                pol,
+                            )  # Bottom-right
 
-                        features.append(HaarFeature([rect1, rect2, rect3, rect4]))
+                            features.append(HaarFeature([rect1, rect2, rect3, rect4]))
 
     return features
 
