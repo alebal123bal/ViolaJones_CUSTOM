@@ -206,13 +206,13 @@ class HaarFeature:
 if __name__ == "__main__":
     # Create example rectangles
     rect1 = Rectangle(0, 0, 5, 4, +1)
-    # rect2 = Rectangle(5, 18, 5, 4, -1)
+    rect2 = Rectangle(5, 0, 5, 4, -1)
 
     # Create a Haar feature with these rectangles
     haar_feature = HaarFeature(
         [
             rect1,
-            # rect2,
+            rect2,
         ],
         window_size=(22, 22),
         name="Test Feature",
