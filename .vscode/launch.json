@@ -16,6 +16,22 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false
+        },
+        {
+            "name": "Debug Haar Feature Generation",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "basic_elements.feature_gen.feature_gen",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Haar Feature Generation",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "basic_elements.feature_gen.feature_gen",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
         }
     ]
 }

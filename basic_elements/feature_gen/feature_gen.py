@@ -216,3 +216,26 @@ def generate_all_haar_features(
 
     print(f"Total features generated: {len(all_features)}")
     return all_features
+
+
+# Example
+if __name__ == "__main__":
+    my_features = generate_all_haar_features()
+
+    # Import a grayscale image for testing
+    import numpy as np
+
+    image = np.load("basic_elements/haar_feature/test_image.npy")
+
+    for i, feat in enumerate(my_features[0:5]):
+        # Plot the feature
+        feat.plot(grayscale_image=image)
+
+        # Compute the integral image
+        padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
+        intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
+
+        # Evaluate the feature at position (0, 0)
+        feat_val = feat.evaluate(intgr_image, shift_x=0, shift_y=0)
+
+        print(f"Feature {i} value at (0, 0): {feat_val}")
