@@ -48,6 +48,22 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false
+        },
+        {
+            "name": "Debug Matrix Maker",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "matrix_creator.feature_eval_matrix_maker",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Matrix Maker",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "matrix_creator.feature_eval_matrix_maker",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
         }
     ]
 }

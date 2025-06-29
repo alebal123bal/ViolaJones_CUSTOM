@@ -1,6 +1,5 @@
 data_preprocess/
 image_manager/training_set
-matrix_creator/
 viola_jones/
 # Ignore Python cache files
 __pycache__/

@@ -43,6 +43,7 @@ def load_images_from_folder(folder):
 
     images = []
 
+    print(f"\nLoading images from folder: {folder}")
     for filename in os.listdir(folder):
         if (
             filename.endswith(".png")
@@ -53,6 +54,8 @@ def load_images_from_folder(folder):
             img = Image.open(img_path).convert("L")  # Convert to grayscale
             img_array = np.array(img)
             images.append(img_array)
+
+    print("Done.\n")
 
     return images
 
@@ -81,4 +84,4 @@ if __name__ == "__main__":
     # Compute integrals
     intgr_imgs = compute_integral_images(images=imgs)
 
-    print(f"Loaded and computed {len(intgr_imgs)} integral images from {FACE_PATH}")
+    print(f"Computed {len(intgr_imgs)} integral images")

@@ -204,7 +204,7 @@ def generate_all_haar_features(
 
     all_features = []
 
-    print(f"Generating Haar features for {window_size[0]}x{window_size[1]} window...")
+    print(f"\nGenerating Haar features for {window_size[0]}x{window_size[1]} window...")
 
     if "horizontal_2" in feature_types:
         features = generate_two_rectangle_horizontal(window_size)
@@ -231,7 +231,7 @@ def generate_all_haar_features(
         all_features.extend(features)
         print(f"Generated {len(features)} four-rectangle diagonal features")
 
-    print(f"Total features generated: {len(all_features)}")
+    print(f"Total features generated: {len(all_features)}\n")
     return all_features
 
 
