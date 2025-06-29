@@ -32,6 +32,22 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false
+        },
+        {
+            "name": "Debug Image Loader",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "image_manager.image_loader.image_loader",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Image Loader",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "image_manager.image_loader.image_loader",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
         }
     ]
 }
