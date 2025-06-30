@@ -32,8 +32,8 @@ def get_matrix_weights_labels(haar_features=None, integral_images=None):
     if haar_features is None:
         haar_features = generate_all_haar_features()[0:12]
     if integral_images is None:
-        face_images = load_images_from_folder(FACE_PATH)[0:5]
-        not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:5]
+        face_images = load_images_from_folder(FACE_PATH)[0:6]
+        not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:4]
         integral_images = compute_integral_images(face_images + not_face_images)
 
     # Initialize the feature evaluation matrix
