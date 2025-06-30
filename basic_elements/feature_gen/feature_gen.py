@@ -245,22 +245,22 @@ def generate_all_haar_features(
         print(f"Generated {len(features)} two-rectangle horizontal features")
 
     if "vertical_2" in feature_types:
-        features = generate_two_rectangle_vertical(window_size)
+        features = generate_two_rectangle_vertical(window_size, x_start, y_start)
         all_features.extend(features)
         print(f"Generated {len(features)} two-rectangle vertical features")
 
     if "horizontal_3" in feature_types:
-        features = generate_three_rectangle_horizontal(window_size)
+        features = generate_three_rectangle_horizontal(window_size, x_start, y_start)
         all_features.extend(features)
         print(f"Generated {len(features)} three-rectangle horizontal features")
 
     if "vertical_3" in feature_types:
-        features = generate_three_rectangle_vertical(window_size)
+        features = generate_three_rectangle_vertical(window_size, x_start, y_start)
         all_features.extend(features)
         print(f"Generated {len(features)} three-rectangle vertical features")
 
     if "diagonal_4" in feature_types:
-        features = generate_four_rectangle_diagonal(window_size)
+        features = generate_four_rectangle_diagonal(window_size, x_start, y_start)
         all_features.extend(features)
         print(f"Generated {len(features)} four-rectangle diagonal features")
 
