@@ -3,6 +3,7 @@ Load images, compute their integral images, and create a feature evaluation matr
 """
 
 import os
+import time
 
 import numpy as np
 
@@ -155,9 +156,11 @@ def create():
     Create the feature evaluation matrix, weights, and labels if they do not exist.
     """
 
+    start_time = time.time()
+
     # Check if the matrix, weights, and labels already exist
     if exists_matrix_weights_labels(folder=MATRIX_PATH):
-        print("Matrix, weights, and labels already exist. Returning.\n")
+        print("\nMatrix, weights, and labels already exist. Returning.\n")
         return
 
     # Create the feature evaluation matrix
@@ -170,6 +173,10 @@ def create():
         weights=w,
         labels=lab,
     )
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"\nFeature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
 
 
 def _analyze_matrix():
