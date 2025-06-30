@@ -113,7 +113,7 @@ def save_matrix_weights_labels(
     np.save(os.path.join(folder, "weights.npy"), weights)
     np.save(os.path.join(folder, "labels.npy"), labels)
 
-    print(f"Saved feature evaluation matrix, weights, and labels to {folder}")
+    print(f"\nSaved feature evaluation matrix, weights, and labels to {folder}.\n")
 
 
 def load_matrix_weights_labels(folder=MATRIX_PATH):
@@ -260,23 +260,40 @@ def _analyze_matrix(matrix):
     return False
 
 
-def clip(matrix, weights, labels, dtype=np.int16):
+def clip(matrix, weights, labels, dtype=np.int16, chunk_size=10000):
     """
     Clip the feature evaluation matrix to fit within the specified data type range.
+    Uses chunked processing to minimize memory usage.
 
     Args:
         matrix (np.ndarray): The feature evaluation matrix to clip.
-        weights (np.ndarray): The weights associated with the matrix.
-        labels (np.ndarray): The labels associated with the matrix.
-        dtype (np.dtype): The desired data type for the clipped matrix.
-    Returns:
-        tuple: (clipped_matrix, weights, labels)
+        weights (np.ndarray): Weights corresponding to the samples.
+        labels (np.ndarray): Labels corresponding to the samples.
+        dtype (type): Desired data type for the clipped matrix (default: np.int16).
+        chunk_size (int): Number of rows to process in each chunk.
     """
 
     if dtype == np.int16:
-        print("Clipping matrix to fit within int16 range (-32768 to 32767)...")
-        clipped_matrix = np.clip(matrix, INT16_MIN, INT16_MAX).astype(dtype)
+        print("\nClipping matrix to fit within int16 range (-32768 to 32767)...")
+        print(f"Processing in chunks of {chunk_size} rows...")
+
+        # Create output array
+        clipped_matrix = np.empty(matrix.shape, dtype=dtype)
+
+        # Process in chunks
+        for i in range(0, matrix.shape[0], chunk_size):
+            end_idx = min(i + chunk_size, matrix.shape[0])
+
+            # Process chunk
+            chunk = matrix[i:end_idx]
+            np.clip(chunk, INT16_MIN, INT16_MAX, out=chunk)  # In-place clip
+            clipped_matrix[i:end_idx] = chunk.astype(dtype)
+
+            if i % (chunk_size * 10) == 0:  # Progress update
+                print(f"Processed {i}/{matrix.shape[0]} rows...")
+
         return clipped_matrix, weights, labels
+
     raise ValueError(f"Unsupported dtype: {dtype}")
 
 
