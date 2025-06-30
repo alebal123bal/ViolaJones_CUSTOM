@@ -183,7 +183,11 @@ def _analyze_matrix():
     """
     Comprehensive analysis of the feature evaluation matrix to determine
     optimal data type and assess potential for memory optimization.
+
+    Returns:
+        bool: True if int16 conversion is recommended, False otherwise.
     """
+
     matrix, _, _ = load_matrix_weights_labels(folder=MATRIX_PATH)
 
     # Basic matrix info
@@ -269,19 +273,57 @@ def _analyze_matrix():
         print(
             "✅ Very few values would be clipped (<0.01%) - int16 conversion recommended"
         )
+        return True
     elif clipping_percentage < 0.1:
         print(
             "⚠️  Small percentage would be clipped (<0.1%) - int16 conversion likely safe"
         )
+        return True
     elif clipping_percentage < 1.0:
         print("⚠️  Moderate clipping (<1%) - test int16 performance vs memory trade-off")
+        return True
     else:
         print(
             "❌ Significant clipping (>1%) - int16 conversion may hurt model performance"
         )
+        return False
+
+
+def clip(matrix, dtype=np.int16):
+    """
+    Clip the feature evaluation matrix to fit within the specified data type range.
+
+    Args:
+        matrix (np.ndarray): The feature evaluation matrix to clip.
+        dtype (np.dtype): The desired data type for the clipped matrix.
+    """
+
+    if dtype == np.int16:
+        print("Clipping matrix to fit within int16 range (-32768 to 32767)...")
+        INT16_MIN, INT16_MAX = -32768, 32767
+        clipped_matrix = np.clip(matrix, INT16_MIN, INT16_MAX).astype(dtype)
+        # Save the clipped matrix
+        save_matrix_weights_labels(
+            folder=MATRIX_PATH,
+            matrix=clipped_matrix,
+            weights=None,
+            labels=None,
+        )
+    else:
+        raise ValueError(f"Unsupported dtype: {dtype}")
 
 
 # Example usage
 if __name__ == "__main__":
+    # Create the feature evaluation matrix, weights, and labels
     create()
-    _analyze_matrix()
+
+    # Analyze the matrix to determine if clipping is safe
+    DO_CLIPPING = _analyze_matrix()
+
+    # If clipping is safe, clip the matrix
+    mat, _, _ = load_matrix_weights_labels(folder=MATRIX_PATH)
+    if DO_CLIPPING:
+        clip(mat, dtype=np.int16)
+    else:
+        print("Clipping unsafe - keeping original matrix.")
