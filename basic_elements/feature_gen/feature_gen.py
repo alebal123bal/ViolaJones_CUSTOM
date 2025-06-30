@@ -17,6 +17,8 @@ def generate_two_rectangle_horizontal(
 
     Args:
         window_size: Tuple of (width, height) for the detection window
+        x_start: Starting x coordinate for feature generation
+        y_start: Starting y coordinate for feature generation
 
     Returns:
         List of HaarFeature objects
@@ -44,13 +46,17 @@ def generate_two_rectangle_horizontal(
 
 
 def generate_two_rectangle_vertical(
-    window_size: Tuple[int, int] = (22, 22)
+    window_size: Tuple[int, int] = (22, 22),
+    x_start: int = 0,
+    y_start: int = 0,
 ) -> List[HaarFeature]:
     """
     Generate two-rectangle vertical features (top-bottom pattern).
 
     Args:
         window_size: Tuple of (width, height) for the detection window
+        x_start: Starting x coordinate for feature generation
+        y_start: Starting y coordinate for feature generation
 
     Returns:
         List of HaarFeature objects
@@ -59,8 +65,8 @@ def generate_two_rectangle_vertical(
     width, height = window_size
 
     for pol in (1, -1):
-        for y in range(0, height - 1):
-            for x in range(0, width - 1):
+        for y in range(y_start, height - y_start - 1):
+            for x in range(x_start, width - x_start - 1):
                 for w in range(2, width - x + 1):  # Minimum width of 2
                     for h in range(2, height - y, 2):  # Even heights only, step by 2
                         if y + h <= height:
@@ -73,13 +79,17 @@ def generate_two_rectangle_vertical(
 
 
 def generate_three_rectangle_horizontal(
-    window_size: Tuple[int, int] = (22, 22)
+    window_size: Tuple[int, int] = (22, 22),
+    x_start: int = 0,
+    y_start: int = 0,
 ) -> List[HaarFeature]:
     """
     Generate three-rectangle horizontal features (left-center-right pattern).
 
     Args:
         window_size: Tuple of (width, height) for the detection window
+        x_start: Starting x coordinate for feature generation
+        y_start: Starting y coordinate for feature generation
 
     Returns:
         List of HaarFeature objects
@@ -88,8 +98,10 @@ def generate_three_rectangle_horizontal(
     width, height = window_size
 
     for pol in (1, -1):
-        for y in range(0, height - 1):
-            for x in range(0, width - 2):  # -2 to ensure minimum width of 3
+        for y in range(y_start, height - y_start - 1):
+            for x in range(
+                x_start, width - x_start - 2
+            ):  # -2 to ensure minimum width of 3
                 for h in range(2, height - y + 1):
                     for w in range(3, width - x, 3):  # Widths divisible by 3, step by 3
                         if x + w <= width:
@@ -105,13 +117,17 @@ def generate_three_rectangle_horizontal(
 
 
 def generate_three_rectangle_vertical(
-    window_size: Tuple[int, int] = (22, 22)
+    window_size: Tuple[int, int] = (22, 22),
+    x_start: int = 0,
+    y_start: int = 0,
 ) -> List[HaarFeature]:
     """
     Generate three-rectangle vertical features (top-center-bottom pattern).
 
     Args:
         window_size: Tuple of (width, height) for the detection window
+        x_start: Starting x coordinate for feature generation
+        y_start: Starting y coordinate for feature generation
 
     Returns:
         List of HaarFeature objects
@@ -120,8 +136,10 @@ def generate_three_rectangle_vertical(
     width, height = window_size
 
     for pol in (1, -1):
-        for y in range(0, height - 2):  # -2 to ensure minimum height of 3
-            for x in range(0, width - 1):
+        for y in range(
+            y_start, height - y_start - 2
+        ):  # -2 to ensure minimum height of 3
+            for x in range(x_start, width - x_start - 1):
                 for w in range(2, width - x + 1):
                     for h in range(
                         3, height - y, 3
@@ -139,13 +157,17 @@ def generate_three_rectangle_vertical(
 
 
 def generate_four_rectangle_diagonal(
-    window_size: Tuple[int, int] = (22, 22)
+    window_size: Tuple[int, int] = (22, 22),
+    x_start: int = 0,
+    y_start: int = 0,
 ) -> List[HaarFeature]:
     """
     Generate four-rectangle diagonal features (2x2 checkerboard pattern).
 
     Args:
         window_size: Tuple of (width, height) for the detection window
+        x_start: Starting x coordinate for feature generation
+        y_start: Starting y coordinate for feature generation
 
     Returns:
         List of HaarFeature objects
@@ -154,8 +176,8 @@ def generate_four_rectangle_diagonal(
     width, height = window_size
 
     for pol in (1, -1):
-        for y in range(0, height - 1):
-            for x in range(0, width - 1):
+        for y in range(y_start, height - y_start - 1):
+            for x in range(x_start, width - x_start - 1):
                 for h in range(2, height - y, 2):  # Even heights only
                     for w in range(2, width - x, 2):  # Even widths only
                         if x + w <= width and y + h <= height:
@@ -248,9 +270,7 @@ def generate_all_haar_features(
 
 # Example
 if __name__ == "__main__":
-    my_features = generate_all_haar_features(
-        feature_types=["horizontal_2"], x_start=4, y_start=2
-    )
+    my_features = generate_all_haar_features(x_start=4, y_start=2)
 
     # Import a grayscale image for testing
     import numpy as np
