@@ -152,43 +152,6 @@ def exists_matrix_weights_labels(folder=MATRIX_PATH):
     )
 
 
-def create():
-    """
-    Create the feature evaluation matrix, weights, and labels if they do not exist.
-    """
-
-    start_time = time.time()
-
-    # Check if the matrix, weights, and labels already exist
-    if exists_matrix_weights_labels(folder=MATRIX_PATH):
-        print("\nMatrix, weights, and labels already exist. Returning.\n")
-        return
-
-    # Create the feature evaluation matrix
-    mat, w, l = get_matrix_weights_labels()
-
-    # Analyze the matrix to determine if clipping is safe
-    do_clipping = _analyze_matrix(matrix=mat)
-
-    # If clipping is safe, clip the matrix
-    if do_clipping:
-        mat, w, l = clip(mat, w, l, dtype=np.int16)
-    else:
-        print("Clipping unsafe - keeping original matrix.")
-
-    # Save the matrix, weights, and labels to a file
-    save_matrix_weights_labels(
-        folder=MATRIX_PATH,
-        matrix=mat,
-        weights=w,
-        labels=l,
-    )
-
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"\nFeature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
-
-
 def _analyze_matrix(matrix):
     """
     Comprehensive analysis of the feature evaluation matrix to determine
@@ -315,6 +278,43 @@ def clip(matrix, weights, labels, dtype=np.int16):
         clipped_matrix = np.clip(matrix, INT16_MIN, INT16_MAX).astype(dtype)
         return clipped_matrix, weights, labels
     raise ValueError(f"Unsupported dtype: {dtype}")
+
+
+def create():
+    """
+    Create the feature evaluation matrix, weights, and labels if they do not exist.
+    """
+
+    start_time = time.time()
+
+    # Check if the matrix, weights, and labels already exist
+    if exists_matrix_weights_labels(folder=MATRIX_PATH):
+        print("\nMatrix, weights, and labels already exist. Returning.\n")
+        return
+
+    # Create the feature evaluation matrix
+    mat, w, l = get_matrix_weights_labels()
+
+    # Analyze the matrix to determine if clipping is safe
+    do_clipping = _analyze_matrix(matrix=mat)
+
+    # If clipping is safe, clip the matrix
+    if do_clipping:
+        mat, w, l = clip(mat, w, l, dtype=np.int16)
+    else:
+        print("Clipping unsafe - keeping original matrix.")
+
+    # Save the matrix, weights, and labels to a file
+    save_matrix_weights_labels(
+        folder=MATRIX_PATH,
+        matrix=mat,
+        weights=w,
+        labels=l,
+    )
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"\nFeature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
 
 
 # Example usage
