@@ -290,12 +290,14 @@ def _analyze_matrix():
         return False
 
 
-def clip(matrix, dtype=np.int16):
+def clip(matrix, weights, labels, dtype=np.int16):
     """
     Clip the feature evaluation matrix to fit within the specified data type range.
 
     Args:
         matrix (np.ndarray): The feature evaluation matrix to clip.
+        weights (np.ndarray): The weights associated with the matrix.
+        labels (np.ndarray): The labels associated with the matrix.
         dtype (np.dtype): The desired data type for the clipped matrix.
     """
 
@@ -306,8 +308,8 @@ def clip(matrix, dtype=np.int16):
         save_matrix_weights_labels(
             folder=MATRIX_PATH,
             matrix=clipped_matrix,
-            weights=None,
-            labels=None,
+            weights=weights,
+            labels=labels,
         )
     else:
         raise ValueError(f"Unsupported dtype: {dtype}")
@@ -322,8 +324,8 @@ if __name__ == "__main__":
     DO_CLIPPING = _analyze_matrix()
 
     # If clipping is safe, clip the matrix
-    my_mat, _, _ = load_matrix_weights_labels(folder=MATRIX_PATH)
+    my_mat, my_w, my_l = load_matrix_weights_labels(folder=MATRIX_PATH)
     if DO_CLIPPING:
-        clip(my_mat, dtype=np.int16)
+        clip(my_mat, my_w, my_l, dtype=np.int16)
     else:
         print("Clipping unsafe - keeping original matrix.")
