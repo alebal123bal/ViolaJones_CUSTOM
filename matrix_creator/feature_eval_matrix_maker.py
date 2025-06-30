@@ -16,6 +16,7 @@ from image_manager.image_loader.image_loader import (
 )
 
 MATRIX_PATH = "matrix_creator/eval_matrix_weights_labels"
+INT16_MIN, INT16_MAX = -32768, 32767
 
 
 def get_matrix_weights_labels(haar_features=None, integral_images=None):
@@ -205,7 +206,6 @@ def _analyze_matrix():
     print("\n=== Data Type Analysis ===")
 
     # int16 analysis
-    INT16_MIN, INT16_MAX = -32768, 32767
     too_high = np.sum(matrix > INT16_MAX)
     too_low = np.sum(matrix < INT16_MIN)
     total_clipped = too_high + too_low
@@ -262,7 +262,8 @@ def _analyze_matrix():
             print(f"All extreme values: {sorted(extreme_values)}")
         else:
             print(
-                f"Sample extreme values: {sorted(extreme_values)[:10]} ... {sorted(extreme_values)[-10:]}"
+                f"""Sample extreme values: {sorted(extreme_values)[:10]} ..."""
+                f"""{sorted(extreme_values)[-10:]}"""
             )
 
     # Recommendation
@@ -300,7 +301,6 @@ def clip(matrix, dtype=np.int16):
 
     if dtype == np.int16:
         print("Clipping matrix to fit within int16 range (-32768 to 32767)...")
-        INT16_MIN, INT16_MAX = -32768, 32767
         clipped_matrix = np.clip(matrix, INT16_MIN, INT16_MAX).astype(dtype)
         # Save the clipped matrix
         save_matrix_weights_labels(
@@ -322,8 +322,8 @@ if __name__ == "__main__":
     DO_CLIPPING = _analyze_matrix()
 
     # If clipping is safe, clip the matrix
-    mat, _, _ = load_matrix_weights_labels(folder=MATRIX_PATH)
+    my_mat, _, _ = load_matrix_weights_labels(folder=MATRIX_PATH)
     if DO_CLIPPING:
-        clip(mat, dtype=np.int16)
+        clip(my_mat, dtype=np.int16)
     else:
         print("Clipping unsafe - keeping original matrix.")
