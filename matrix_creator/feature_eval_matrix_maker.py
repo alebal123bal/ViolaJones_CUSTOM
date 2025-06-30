@@ -56,6 +56,9 @@ def get_matrix_weights_labels(haar_features=None, integral_images=None):
             feature_eval_matrix[i, j] = feature.evaluate(
                 integral_image, shift_x=0, shift_y=0
             )
+        # Print every 10% of total features
+        if i % (num_features // 10) == 0:
+            print(f"Evaluated {i + 1}/{num_features} features.")
 
     # Weights
     num_faces = len(face_images)
@@ -169,6 +172,109 @@ def create():
     )
 
 
+def _analyze_matrix():
+    """
+    Comprehensive analysis of the feature evaluation matrix to determine
+    optimal data type and assess potential for memory optimization.
+    """
+    matrix, _, _ = load_matrix_weights_labels(folder=MATRIX_PATH)
+
+    # Basic matrix info
+    print(f"Matrix shape: {matrix.shape}")
+    print(f"Total elements: {matrix.size:,}")
+    print(f"Current data type: {matrix.dtype}")
+    print(f"Current memory usage: {matrix.nbytes / 1024**2:.1f} MB\n")
+
+    # Value range analysis
+    min_val, max_val = np.min(matrix), np.max(matrix)
+    print(f"Value range: {min_val:,} to {max_val:,}")
+    print(f"Range span: {max_val - min_val:,}")
+
+    # Data type compatibility analysis
+    print("\n=== Data Type Analysis ===")
+
+    # int16 analysis
+    INT16_MIN, INT16_MAX = -32768, 32767
+    too_high = np.sum(matrix > INT16_MAX)
+    too_low = np.sum(matrix < INT16_MIN)
+    total_clipped = too_high + too_low
+
+    print(f"int16 range: {INT16_MIN:,} to {INT16_MAX:,}")
+    print(f"Values exceeding int16 max: {too_high:,} ({too_high/matrix.size*100:.4f}%)")
+    print(f"Values below int16 min: {too_low:,} ({too_low/matrix.size*100:.4f}%)")
+    print(
+        f"Total values clipped: {total_clipped:,} ({total_clipped/matrix.size*100:.4f}%)"
+    )
+
+    # Memory savings calculation
+    current_memory = matrix.nbytes
+    int16_memory = matrix.size * 2  # 2 bytes per int16
+    memory_saved = current_memory - int16_memory
+
+    print(f"\nMemory with int16: {int16_memory / 1024**2:.1f} MB")
+    print(
+        f"Memory savings: {memory_saved / 1024**2:.1f} MB ({memory_saved/current_memory*100:.1f}%)"
+    )
+
+    # Value distribution analysis
+    print("\n=== Value Distribution ===")
+    print(f"Mean: {np.mean(matrix):.2f}")
+    print(f"Std deviation: {np.std(matrix):.2f}")
+    print(f"Median: {np.median(matrix):.2f}")
+
+    # Percentile analysis
+    percentiles = [1, 5, 10, 90, 95, 99]
+    print("\nPercentiles:")
+    for p in percentiles:
+        val = np.percentile(matrix, p)
+        print(f"  {p:2d}th: {val:8.0f}")
+
+    # Zero analysis
+    zero_count = np.sum(matrix == 0)
+    print(f"\nZero values: {zero_count:,} ({zero_count/matrix.size*100:.2f}%)")
+
+    # Histogram of extreme values
+    _ = max(abs(INT16_MIN), INT16_MAX)
+    extreme_values = matrix[(matrix > INT16_MAX) | (matrix < INT16_MIN)]
+
+    if len(extreme_values) > 0:
+        print("\n=== Extreme Values Analysis ===")
+        print(f"Extreme values (beyond int16): {len(extreme_values):,}")
+        print(
+            f"Extreme value range: {np.min(extreme_values):,} to {np.max(extreme_values):,}"
+        )
+        print(f"Most extreme positive: {np.max(matrix):,}")
+        print(f"Most extreme negative: {np.min(matrix):,}")
+
+        # Show distribution of extreme values
+        if len(extreme_values) <= 20:
+            print(f"All extreme values: {sorted(extreme_values)}")
+        else:
+            print(
+                f"Sample extreme values: {sorted(extreme_values)[:10]} ... {sorted(extreme_values)[-10:]}"
+            )
+
+    # Recommendation
+    print("\n=== Recommendation ===")
+    clipping_percentage = total_clipped / matrix.size * 100
+
+    if clipping_percentage < 0.01:
+        print(
+            "✅ Very few values would be clipped (<0.01%) - int16 conversion recommended"
+        )
+    elif clipping_percentage < 0.1:
+        print(
+            "⚠️  Small percentage would be clipped (<0.1%) - int16 conversion likely safe"
+        )
+    elif clipping_percentage < 1.0:
+        print("⚠️  Moderate clipping (<1%) - test int16 performance vs memory trade-off")
+    else:
+        print(
+            "❌ Significant clipping (>1%) - int16 conversion may hurt model performance"
+        )
+
+
 # Example usage
 if __name__ == "__main__":
     create()
+    _analyze_matrix()
