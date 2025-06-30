@@ -242,7 +242,18 @@ if __name__ == "__main__":
     # Import a grayscale image for testing
     import numpy as np
 
-    image = np.load("basic_elements/haar_feature/test_image.npy")
+    # Uncomment the line below to load the precomputed npy array of the 1st image
+    # image = np.load("basic_elements/feature_gen/test_image.npy")
+
+    from image_manager.image_loader.image_loader import (
+        load_images_from_folder,
+        FACE_PATH,
+    )
+
+    # Load all
+    face_images = load_images_from_folder(FACE_PATH)
+    # Use the nth image for testing
+    image = face_images[0]
 
     for i, feat in enumerate(my_features[0:5]):
         # Plot the feature
