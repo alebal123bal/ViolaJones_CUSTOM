@@ -147,14 +147,15 @@ def exists_matrix_weights_labels(folder=MATRIX_PATH):
     )
 
 
-# Example usage
-if __name__ == "__main__":
+def create():
+    """
+    Create the feature evaluation matrix, weights, and labels if they do not exist.
+    """
+
     # Check if the matrix, weights, and labels already exist
     if exists_matrix_weights_labels(folder=MATRIX_PATH):
-        print("Matrix, weights, and labels already exist. Loading them...")
-        mat, w, lab = load_matrix_weights_labels(folder=MATRIX_PATH)
-        print("Loaded successfully.")
-        exit()
+        print("Matrix, weights, and labels already exist. Returning.\n")
+        return
 
     # Create the feature evaluation matrix
     mat, w, lab = get_matrix_weights_labels()
@@ -166,3 +167,8 @@ if __name__ == "__main__":
         weights=w,
         labels=lab,
     )
+
+
+# Example usage
+if __name__ == "__main__":
+    create()
