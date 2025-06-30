@@ -8,7 +8,9 @@ from basic_elements.haar_feature.haar_feature import HaarFeature
 
 
 def generate_two_rectangle_horizontal(
-    window_size: Tuple[int, int] = (22, 22)
+    window_size: Tuple[int, int] = (22, 22),
+    x_start: int = 0,
+    y_start: int = 0,
 ) -> List[HaarFeature]:
     """
     Generate two-rectangle horizontal features (left-right pattern).
@@ -24,8 +26,12 @@ def generate_two_rectangle_horizontal(
 
     for pol in (1, -1):
         # Try different positions and sizes
-        for y in range(0, height - 1):  # -1 to ensure minimum height of 2
-            for x in range(0, width - 1):  # -1 to ensure minimum width of 2
+        for y in range(
+            y_start, height - y_start - 1
+        ):  # -1 to ensure minimum height of 2
+            for x in range(
+                x_start, width - x_start - 1
+            ):  # -1 to ensure minimum width of 2
                 for h in range(2, height - y + 1):  # Minimum height of 2
                     for w in range(2, width - x, 2):  # Even widths only, step by 2
                         if x + w <= width:
@@ -179,7 +185,10 @@ def generate_four_rectangle_diagonal(
 
 
 def generate_all_haar_features(
-    window_size: Tuple[int, int] = (22, 22), feature_types: List[str] = None
+    window_size: Tuple[int, int] = (22, 22),
+    feature_types: List[str] = None,
+    x_start: int = 0,
+    y_start: int = 0,
 ) -> List[HaarFeature]:
     """
     Generate all Haar features for the given window size.
@@ -188,6 +197,8 @@ def generate_all_haar_features(
         window_size: Tuple of (width, height) for the detection window
         feature_types: List of feature types to generate. If None, generates all types.
         Valid types: ['horizontal_2', 'vertical_2', 'horizontal_3', 'vertical_3', 'diagonal_4']
+        x_start: Starting x coordinate for feature generation
+        y_start: Starting y coordinate for feature generation
 
     Returns:
         List of all generated HaarFeature objects
@@ -207,7 +218,7 @@ def generate_all_haar_features(
     print(f"\nGenerating Haar features for {window_size[0]}x{window_size[1]} window...")
 
     if "horizontal_2" in feature_types:
-        features = generate_two_rectangle_horizontal(window_size)
+        features = generate_two_rectangle_horizontal(window_size, x_start, y_start)
         all_features.extend(features)
         print(f"Generated {len(features)} two-rectangle horizontal features")
 
@@ -237,7 +248,9 @@ def generate_all_haar_features(
 
 # Example
 if __name__ == "__main__":
-    my_features = generate_all_haar_features()
+    my_features = generate_all_haar_features(
+        feature_types=["horizontal_2"], x_start=4, y_start=2
+    )
 
     # Import a grayscale image for testing
     import numpy as np
