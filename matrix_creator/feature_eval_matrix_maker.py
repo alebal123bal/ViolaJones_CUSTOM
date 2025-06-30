@@ -165,14 +165,23 @@ def create():
         return
 
     # Create the feature evaluation matrix
-    mat, w, lab = get_matrix_weights_labels()
+    mat, w, l = get_matrix_weights_labels()
+
+    # Analyze the matrix to determine if clipping is safe
+    do_clipping = _analyze_matrix(matrix=mat)
+
+    # If clipping is safe, clip the matrix
+    if do_clipping:
+        mat, w, l = clip(mat, w, l, dtype=np.int16)
+    else:
+        print("Clipping unsafe - keeping original matrix.")
 
     # Save the matrix, weights, and labels to a file
     save_matrix_weights_labels(
         folder=MATRIX_PATH,
         matrix=mat,
         weights=w,
-        labels=lab,
+        labels=l,
     )
 
     end_time = time.time()
@@ -180,16 +189,17 @@ def create():
     print(f"\nFeature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
 
 
-def _analyze_matrix():
+def _analyze_matrix(matrix):
     """
     Comprehensive analysis of the feature evaluation matrix to determine
     optimal data type and assess potential for memory optimization.
 
+    Args:
+        matrix (np.ndarray): The feature evaluation matrix to analyze.
+
     Returns:
         bool: True if int16 conversion is recommended, False otherwise.
     """
-
-    matrix, _, _ = load_matrix_weights_labels(folder=MATRIX_PATH)
 
     # Basic matrix info
     print(f"Matrix shape: {matrix.shape}")
@@ -275,19 +285,16 @@ def _analyze_matrix():
             "✅ Very few values would be clipped (<0.01%) - int16 conversion recommended"
         )
         return True
-    elif clipping_percentage < 0.1:
+    if clipping_percentage < 0.1:
         print(
             "⚠️  Small percentage would be clipped (<0.1%) - int16 conversion likely safe"
         )
         return True
-    elif clipping_percentage < 1.0:
+    if clipping_percentage < 1.0:
         print("⚠️  Moderate clipping (<1%) - test int16 performance vs memory trade-off")
         return True
-    else:
-        print(
-            "❌ Significant clipping (>1%) - int16 conversion may hurt model performance"
-        )
-        return False
+    print("❌ Significant clipping (>1%) - int16 conversion may hurt model performance")
+    return False
 
 
 def clip(matrix, weights, labels, dtype=np.int16):
@@ -299,33 +306,18 @@ def clip(matrix, weights, labels, dtype=np.int16):
         weights (np.ndarray): The weights associated with the matrix.
         labels (np.ndarray): The labels associated with the matrix.
         dtype (np.dtype): The desired data type for the clipped matrix.
+    Returns:
+        tuple: (clipped_matrix, weights, labels)
     """
 
     if dtype == np.int16:
         print("Clipping matrix to fit within int16 range (-32768 to 32767)...")
         clipped_matrix = np.clip(matrix, INT16_MIN, INT16_MAX).astype(dtype)
-        # Save the clipped matrix
-        save_matrix_weights_labels(
-            folder=MATRIX_PATH,
-            matrix=clipped_matrix,
-            weights=weights,
-            labels=labels,
-        )
-    else:
-        raise ValueError(f"Unsupported dtype: {dtype}")
+        return clipped_matrix, weights, labels
+    raise ValueError(f"Unsupported dtype: {dtype}")
 
 
 # Example usage
 if __name__ == "__main__":
     # Create the feature evaluation matrix, weights, and labels
     create()
-
-    # Analyze the matrix to determine if clipping is safe
-    DO_CLIPPING = _analyze_matrix()
-
-    # If clipping is safe, clip the matrix
-    my_mat, my_w, my_l = load_matrix_weights_labels(folder=MATRIX_PATH)
-    if DO_CLIPPING:
-        clip(my_mat, my_w, my_l, dtype=np.int16)
-    else:
-        print("Clipping unsafe - keeping original matrix.")
