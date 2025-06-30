@@ -11,6 +11,25 @@ FACE_PATH = "image_manager/training_set/face"
 NOT_FACE_PATH = "image_manager/training_set/not_face"
 
 
+def load_image_as_array(image_path):
+    """
+    Load an image from a given path and convert it to a grayscale numpy array.
+
+    Args:
+        image_path (str): Path to the image file.
+
+    Returns:
+        np.ndarray: Grayscale image as a 2D numpy array.
+    """
+    try:
+        img = Image.open(image_path).convert("L")  # Convert to grayscale
+        img_array = np.array(img)
+        return img_array
+    except FileNotFoundError as e:
+        print(f"Image {image_path} not found: {e}")
+        return None
+
+
 def compute_integral_image(image):
     """
     Compute the integral image of a given image.
