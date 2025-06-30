@@ -2,6 +2,8 @@
 Load images, compute their integral images, and create a feature evaluation matrix.
 """
 
+import os
+
 import numpy as np
 
 from basic_elements.feature_gen.feature_gen import generate_all_haar_features
@@ -11,6 +13,8 @@ from image_manager.image_loader.image_loader import (
     FACE_PATH,
     NOT_FACE_PATH,
 )
+
+MATRIX_PATH = "matrix_creator/eval_matrix_weights_labels"
 
 
 def get_matrix_weights_labels(haar_features=None, integral_images=None):
@@ -29,6 +33,10 @@ def get_matrix_weights_labels(haar_features=None, integral_images=None):
         np.ndarray: Weights for each sample in the dataset.
         np.ndarray: Labels for each sample, where 1 indicates a face and 0 indicates a non-face.
     """
+
+    print("\nCreating feature evaluation matrix, weights, and labels...\n")
+
+    # Load Haar features and integral images if not provided
     if haar_features is None:
         haar_features = generate_all_haar_features()[0:12]
     if integral_images is None:
@@ -69,11 +77,16 @@ def get_matrix_weights_labels(haar_features=None, integral_images=None):
     labels[:num_faces] = 1  # Faces labeled as 1
     labels[num_faces:] = -1  # Non-faces labeled as -1
 
+    print("Created feature evaluation matrix, weights, and labels.\n")
+    print(f"Feature evaluation matrix shape: {feature_eval_matrix.shape}")
+    print(f"Weights shape: {weights.shape}")
+    print(f"Labels shape: {labels.shape}\n")
+
     return feature_eval_matrix, weights, labels
 
 
 def save_matrix_weights_labels(
-    folder="matrix_creator/eval_matrix_weights_labels",
+    folder=MATRIX_PATH,
     matrix=None,
     weights=None,
     labels=None,
@@ -86,7 +99,6 @@ def save_matrix_weights_labels(
         haar_features (list, optional): List of Haar features to evaluate.
         integral_images (list, optional): List of integral images to evaluate the features on.
     """
-    import os
 
     # Ensure the folder exists
     os.makedirs(folder, exist_ok=True)
@@ -99,14 +111,57 @@ def save_matrix_weights_labels(
     print(f"Saved feature evaluation matrix, weights, and labels to {folder}")
 
 
+def load_matrix_weights_labels(folder=MATRIX_PATH):
+    """
+    Load the feature evaluation matrix, weights, and labels from a file.
+
+    Args:
+        folder (str): Folder path where the data is saved.
+
+    Returns:
+        tuple: (matrix, weights, labels)
+    """
+    matrix = np.load(os.path.join(folder, "feature_eval_matrix.npy"))
+    weights = np.load(os.path.join(folder, "weights.npy"))
+    labels = np.load(os.path.join(folder, "labels.npy"))
+
+    print(f"Loaded feature evaluation matrix, weights, and labels from {folder}")
+
+    return matrix, weights, labels
+
+
+def exists_matrix_weights_labels(folder=MATRIX_PATH):
+    """
+    Check if the feature evaluation matrix, weights, and labels exist in the specified folder.
+
+    Args:
+        folder (str): Folder path where the data is saved.
+
+    Returns:
+        bool: True if the files exist, False otherwise.
+    """
+    return (
+        os.path.exists(os.path.join(folder, "feature_eval_matrix.npy"))
+        and os.path.exists(os.path.join(folder, "weights.npy"))
+        and os.path.exists(os.path.join(folder, "labels.npy"))
+    )
+
+
 # Example usage
 if __name__ == "__main__":
+    # Check if the matrix, weights, and labels already exist
+    if exists_matrix_weights_labels(folder=MATRIX_PATH):
+        print("Matrix, weights, and labels already exist. Loading them...")
+        mat, w, lab = load_matrix_weights_labels(folder=MATRIX_PATH)
+        print("Loaded successfully.")
+        exit()
+
     # Create the feature evaluation matrix
     mat, w, lab = get_matrix_weights_labels()
 
     # Save the matrix, weights, and labels to a file
     save_matrix_weights_labels(
-        folder="matrix_creator/eval_matrix_weights_labels",
+        folder=MATRIX_PATH,
         matrix=mat,
         weights=w,
         labels=lab,
