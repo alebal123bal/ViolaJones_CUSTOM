@@ -19,15 +19,19 @@ MATRIX_PATH = "matrix_creator/eval_matrix_weights_labels"
 INT16_MIN, INT16_MAX = -32768, 32767
 
 
-def get_matrix_weights_labels(haar_features=None, integral_images=None):
+def get_matrix_weights_labels(
+    haar_features=None, face_images=None, not_face_images=None
+):
     """
     Create a feature evaluation matrix, its weights and labels.
 
     Args:
         haar_features (list, optional): List of Haar features to evaluate.
           If None, generates all Haar features.
-        integral_images (list, optional): List of integral images to evaluate the features on.
-          If None, loads images from FACE_PATH and NOT_FACE_PATH.
+        face_images (list, optional): List of face images to evaluate the features on.
+          If None, loads images from FACE_PATH.
+        not_face_images (list, optional): List of non-face images to evaluate the features on.
+          If None, loads images from NOT_FACE_PATH.
 
     Returns:
         np.ndarray: Feature evaluation matrix where each row corresponds to a Haar feature and
@@ -40,11 +44,17 @@ def get_matrix_weights_labels(haar_features=None, integral_images=None):
 
     # Load Haar features and integral images if not provided
     if haar_features is None:
+        print("Haar features not provided. Generating all Haar features...\n")
         haar_features = generate_all_haar_features()[0:12]
-    if integral_images is None:
+    if face_images is None:
+        print("Face images not provided. Loading images from folders...\n")
         face_images = load_images_from_folder(FACE_PATH)[0:6]
+    if not_face_images is None:
+        print("Not-Face images not provided. Loading images from folders...\n")
         not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:4]
-        integral_images = compute_integral_images(face_images + not_face_images)
+
+    # Compute integral images for the provided face and not-face images
+    integral_images = compute_integral_images(face_images + not_face_images)
 
     # Initialize the feature evaluation matrix
     num_features = len(haar_features)
@@ -297,9 +307,15 @@ def clip(matrix, weights, labels, dtype=np.int16, chunk_size=10000):
     raise ValueError(f"Unsupported dtype: {dtype}")
 
 
-def create():
+def create(haar_features=None, face_images=None, not_face_images=None):
     """
     Create the feature evaluation matrix, weights, and labels if they do not exist.
+
+    Args:
+        haar_features (list, optional): List of Haar features to evaluate.
+          If None, generates all Haar features.
+        face_images (list, optional): List of face images to evaluate the features on.
+        not_face_images (list, optional): List of non-face images to evaluate the features on.
     """
 
     start_time = time.time()
@@ -310,7 +326,11 @@ def create():
         return
 
     # Create the feature evaluation matrix
-    mat, w, l = get_matrix_weights_labels()
+    mat, w, l = get_matrix_weights_labels(
+        haar_features=haar_features,
+        face_images=face_images,
+        not_face_images=not_face_images,
+    )
 
     # Analyze the matrix to determine if clipping is safe
     do_clipping = _analyze_matrix(matrix=mat)
