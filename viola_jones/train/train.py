@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Load images from the dataset folders
     face_images = load_images_from_folder(FACE_PATH)[0:10]
-    not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:5]
+    not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:10]
     integral_images = compute_integral_images(face_images + not_face_images)
 
     # Create the feature evaluation matrix, weights, and labels
