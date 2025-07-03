@@ -64,6 +64,22 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false
+        },
+        {
+            "name": "Debug Training",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "viola_jones.train.train",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Training",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "viola_jones.train.train",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
         }
     ]
 }
