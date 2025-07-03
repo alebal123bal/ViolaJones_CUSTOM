@@ -4,3 +4,4 @@ matrix_creator/eval_matrix_weights_labels
 viola_jones/inference
 # Ignore Python cache files
 __pycache__/
+_pickle_folder/ 
