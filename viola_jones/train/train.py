@@ -55,7 +55,7 @@ if __name__ == "__main__":
     feature_matrix, weights, labels = load_matrix_weights_labels()
 
     # Perform cascade prediction
-    final_predictions = adaboost_classifier.cascade_predictions(
+    final_predictions = adaboost_classifier.get_overall_accuracy(
         matrix=feature_matrix,
         weights=weights,
         labels=labels,
