@@ -1,0 +1,3 @@
+[submodule "AdaBoost_smart"]
+	path = AdaBoost_smart
+	url = https://github.com/alebal123bal/AdaBoost_smart.git
