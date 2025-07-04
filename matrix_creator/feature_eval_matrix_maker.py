@@ -81,6 +81,7 @@ def get_matrix_weights_labels(
     weights = np.ones(total_samples, dtype=np.float16)
 
     # Assign weights inversely proportional to class size
+    # TODO increase weights for faces
     weights[:num_faces] = 1.0 / num_faces  # Face weights
     weights[num_faces:] = 1.0 / num_non_faces  # Non-face weights
 
