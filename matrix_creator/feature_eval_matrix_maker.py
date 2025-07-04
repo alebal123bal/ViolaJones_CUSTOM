@@ -78,7 +78,9 @@ def get_matrix_weights_labels(
     total_samples = num_faces + num_non_faces
 
     # Create weights array
-    weights = np.ones(total_samples, dtype=np.float16)
+    weights = np.ones(
+        total_samples, dtype=np.float32
+    )  # Float32 for numba compatibility
 
     # Assign weights inversely proportional to class size
     # TODO increase weights for faces
