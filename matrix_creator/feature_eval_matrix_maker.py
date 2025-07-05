@@ -61,6 +61,7 @@ def get_matrix_weights_labels(
     num_images = len(integral_images)
     feature_eval_matrix = np.zeros((num_features, num_images), dtype=np.int32)
 
+    # TODO: vectorize this
     # Evaluate each Haar feature on each integral image
     for i, feature in enumerate(haar_features):
         for j, integral_image in enumerate(integral_images):
@@ -311,7 +312,9 @@ def clip(matrix, weights, labels, dtype=np.int16, chunk_size=10000):
     raise ValueError(f"Unsupported dtype: {dtype}")
 
 
-def create(haar_features=None, face_images=None, not_face_images=None):
+def create_matrix_weights_labels(
+    haar_features=None, face_images=None, not_face_images=None
+):
     """
     Create the feature evaluation matrix, weights, and labels if they do not exist.
 
@@ -361,4 +364,4 @@ def create(haar_features=None, face_images=None, not_face_images=None):
 # Example usage
 if __name__ == "__main__":
     # Create the feature evaluation matrix, weights, and labels
-    create()
+    create_matrix_weights_labels()

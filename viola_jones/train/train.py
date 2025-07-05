@@ -4,7 +4,7 @@ Train a Viola-Jones face detection model using the optimized AdaBoost.
 
 import time
 from matrix_creator.feature_eval_matrix_maker import (
-    create,
+    create_matrix_weights_labels,
     generate_all_haar_features,
     load_images_from_folder,
     compute_integral_images,
@@ -17,28 +17,20 @@ from AdaBoost_smart.adaboost import AdaBoost, ClassifierScoreCheck
 if __name__ == "__main__":
     start_time = time.time()
 
-    N = 100
-    CLIP_TEST = False  # Set to True to limit the number of images for testing
+    # Load Haar features eliminating the corner features
+    haar_features = generate_all_haar_features(x_start=4, y_start=2)
 
-    # Load Haar features
-    haar_features = generate_all_haar_features()
-    if CLIP_TEST:
-        haar_features = haar_features[0 : 24 * N]
+    # Load face images from the dataset folder and limit to 2000 images
+    face_images = load_images_from_folder(FACE_PATH)[0:2000]
 
-    # Load face images from the dataset folder
-    face_images = load_images_from_folder(FACE_PATH)[0 : 10 * N]
-    if CLIP_TEST:
-        face_images = face_images[0 : 10 * N]
+    # Load non-face images from the dataset folder and limit to 5000 images
+    not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:5000]
 
-    # Load non-face images from the dataset folder
-    not_face_images = load_images_from_folder(NOT_FACE_PATH)[0 : 20 * N]
-    if CLIP_TEST:
-        not_face_images = not_face_images[0 : 20 * N]
-
+    # Compute integral images for both face and non-face images
     integral_images = compute_integral_images(face_images + not_face_images)
 
     # Create the feature evaluation matrix, weights, and labels
-    create(
+    create_matrix_weights_labels(
         haar_features=haar_features,
         face_images=face_images,
         not_face_images=not_face_images,
@@ -70,3 +62,9 @@ if __name__ == "__main__":
     )
 
     classifier_score.analyze()
+
+    # Visualize the best features
+    for stage in adaboost_classifier.trained_classifier:
+        for feature_dict in stage:
+            feature = haar_features[feature_dict["feature_idx"]]
+            feature.plot(grayscale_image=face_images[0])
