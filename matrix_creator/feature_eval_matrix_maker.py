@@ -95,8 +95,6 @@ def get_matrix_weights_labels(
     num_images = len(integral_images)
     feature_eval_matrix = np.zeros((num_features, num_images), dtype=np.int32)
 
-    # TODO: vectorize this
-
     # Convert once at the beginning
     features_arrays = convert_features_to_arrays(haar_features)
     integral_images_array = np.array(integral_images)
@@ -110,17 +108,6 @@ def get_matrix_weights_labels(
         if i % (num_features // 10) == 0:
             print(f"Evaluated {i + 1}/{num_features} features.")
 
-    # Evaluate each Haar feature on each integral image
-    # for i, feature in enumerate(haar_features):
-    #     for j, integral_image in enumerate(integral_images):
-    #         # Evaluate the feature at position (0, 0) as all images are already 22x22
-    #         feature_eval_matrix[i, j] = feature.evaluate(
-    #             integral_image, shift_x=0, shift_y=0
-    #         )
-    #     # Print every 10% of total features
-    #     if i % (num_features // 10) == 0:
-    #         print(f"Evaluated {i + 1}/{num_features} features.")
-
     # Weights
     num_faces = len(face_images)
     num_non_faces = len(not_face_images)
@@ -132,7 +119,6 @@ def get_matrix_weights_labels(
     )  # Float32 for numba compatibility
 
     # Assign weights inversely proportional to class size
-    # TODO increase weights for faces
     weights[:num_faces] = 5.0 / num_faces  # Face weights
     weights[num_faces:] = 1.0 / num_non_faces  # Non-face weights
 
