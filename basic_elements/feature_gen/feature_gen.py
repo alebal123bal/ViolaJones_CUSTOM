@@ -213,6 +213,7 @@ def generate_eye_like_horizontal(
 ) -> List[HaarFeature]:
     """
     Generate eye-like horizontal features (dark-light-dark pattern).
+    Eye regions are 1 pixel wider than the nose region.
     Useful for detecting eye regions with bright areas between dark eyebrows/eyes.
 
     Args:
@@ -228,19 +229,40 @@ def generate_eye_like_horizontal(
 
     for pol in (1, -1):
         for y in range(y_start, height - y_start - 1):
-            for x in range(x_start, width - x_start - 2):  # Need at least 3 rectangles
+            for x in range(
+                x_start, width - x_start - 4
+            ):  # Need at least 5 pixels total
                 for h in range(2, height - y + 1):
-                    for w in range(3, width - x, 3):  # Widths divisible by 3
+                    # Start with minimum 5 pixels, step by 1 (not 3)
+                    for w in range(5, width - x + 1):
                         if x + w <= width:
-                            rect_width = w // 3
-                            rect1 = Rectangle(x, y, rect_width, h, -pol)  # Dark
-                            rect2 = Rectangle(
-                                x + rect_width, y, rect_width, h, pol
-                            )  # Light
-                            rect3 = Rectangle(
-                                x + 2 * rect_width, y, rect_width, h, -pol
-                            )  # Dark
-                            features.append(HaarFeature([rect1, rect2, rect3]))
+                            # Calculate widths: eye + nose + eye = w
+                            # If nose = n, then eyes = n + 1
+                            # So: (n+1) + n + (n+1) = w
+                            # 3n + 2 = w
+                            # n = (w - 2) / 3
+
+                            if (w - 2) % 3 == 0:  # Only when we can divide evenly
+                                nose_width = (w - 2) // 3
+                                eye_width = nose_width + 1
+
+                                if (
+                                    nose_width >= 1 and eye_width >= 2
+                                ):  # Ensure minimum sizes
+                                    rect1 = Rectangle(
+                                        x, y, eye_width, h, -pol
+                                    )  # Left eye (dark)
+                                    rect2 = Rectangle(
+                                        x + eye_width, y, nose_width, h, pol
+                                    )  # Nose (light)
+                                    rect3 = Rectangle(
+                                        x + eye_width + nose_width,
+                                        y,
+                                        eye_width,
+                                        h,
+                                        -pol,
+                                    )  # Right eye (dark)
+                                    features.append(HaarFeature([rect1, rect2, rect3]))
 
     return features
 
