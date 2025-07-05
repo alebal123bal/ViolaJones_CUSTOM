@@ -19,6 +19,40 @@ MATRIX_PATH = "matrix_creator/eval_matrix_weights_labels"
 INT16_MIN, INT16_MAX = -32768, 32767
 
 
+def convert_features_to_arrays(haar_features):
+    """Convert feature objects to numpy arrays for vectorization"""
+    features_data = []
+    for feature in haar_features:
+        rects = []
+        for rect in feature.rectangles:
+            rects.append([rect.x, rect.y, rect.x2, rect.y2, rect.sign])
+        features_data.append(np.array(rects))
+    return features_data
+
+
+def evaluate_feature_vectorized(rectangles_data, integral_images):
+    """
+    rectangles_data: (n_rects, 5) array with [x, y, x2, y2, sign] for each rectangle
+    integral_images: (n_images, height, width) array
+    """
+    n_images = integral_images.shape[0]
+    feature_values = np.zeros(n_images, dtype=np.int32)
+
+    for rect_data in rectangles_data:
+        x1, y1, x2, y2, sign = rect_data
+
+        # Vectorized calculation across all images
+        a = integral_images[:, y2, x2]
+        b = integral_images[:, y1, x2]
+        c = integral_images[:, y2, x1]
+        d = integral_images[:, y1, x1]
+
+        rect_sums = a - b - c + d
+        feature_values += sign * rect_sums
+
+    return feature_values
+
+
 def get_matrix_weights_labels(
     haar_features=None, face_images=None, not_face_images=None
 ):
@@ -62,16 +96,30 @@ def get_matrix_weights_labels(
     feature_eval_matrix = np.zeros((num_features, num_images), dtype=np.int32)
 
     # TODO: vectorize this
-    # Evaluate each Haar feature on each integral image
-    for i, feature in enumerate(haar_features):
-        for j, integral_image in enumerate(integral_images):
-            # Evaluate the feature at position (0, 0) as all images are already 22x22
-            feature_eval_matrix[i, j] = feature.evaluate(
-                integral_image, shift_x=0, shift_y=0
-            )
+
+    # Convert once at the beginning
+    features_arrays = convert_features_to_arrays(haar_features)
+    integral_images_array = np.array(integral_images)
+
+    # Vectorized evaluation
+    for i, feature_rects in enumerate(features_arrays):
+        feature_eval_matrix[i, :] = evaluate_feature_vectorized(
+            feature_rects, integral_images_array
+        )
         # Print every 10% of total features
         if i % (num_features // 10) == 0:
             print(f"Evaluated {i + 1}/{num_features} features.")
+
+    # Evaluate each Haar feature on each integral image
+    # for i, feature in enumerate(haar_features):
+    #     for j, integral_image in enumerate(integral_images):
+    #         # Evaluate the feature at position (0, 0) as all images are already 22x22
+    #         feature_eval_matrix[i, j] = feature.evaluate(
+    #             integral_image, shift_x=0, shift_y=0
+    #         )
+    #     # Print every 10% of total features
+    #     if i % (num_features // 10) == 0:
+    #         print(f"Evaluated {i + 1}/{num_features} features.")
 
     # Weights
     num_faces = len(face_images)
