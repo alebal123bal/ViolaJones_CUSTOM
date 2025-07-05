@@ -289,8 +289,6 @@ if __name__ == "__main__":
     image = face_images[0]
 
     for i, feat in enumerate(my_features[0:5]):
-        # Plot the feature
-        feat.plot(grayscale_image=image)
 
         # Compute the integral image
         padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
@@ -300,3 +298,6 @@ if __name__ == "__main__":
         feat_val = feat.evaluate(intgr_image, shift_x=0, shift_y=0)
 
         print(f"Feature {i} value at (0, 0): {feat_val}")
+
+        # Plot the feature
+        feat.plot(grayscale_image=image)

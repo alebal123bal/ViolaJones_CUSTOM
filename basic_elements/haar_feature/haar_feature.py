@@ -6,6 +6,7 @@ Raises:
     ValueError: If the feature has no rectangles.
 """
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 from basic_elements.rectangle.rectangle import Rectangle
@@ -193,6 +194,20 @@ class HaarFeature:
         ax.set_yticks(range(display_height + 1))
         plt.grid()
 
+        # If grayscale image is provided, compute integral and haar feature evaluation
+        if grayscale_image is not None:
+            # Compute integral image
+            padded = np.pad(
+                grayscale_image, ((1, 0), (1, 0)), mode="constant", constant_values=0
+            )
+            intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
+
+            # Evaluate the feature at the shifted position
+            feat_val = self.evaluate(intgr_image, shift_x=shift_x, shift_y=shift_y)
+            ax.set_title(
+                f"{self.name} (offset: {shift_x}, {shift_y}) - Value: {feat_val:.2f}"
+            )
+
         plt.show()
 
     def __str__(self):
@@ -219,25 +234,12 @@ if __name__ == "__main__":
     )
 
     # Import a grayscale image for testing
-    import numpy as np
 
-    image = np.load("basic_elements/haar_feature/test_image.npy")
+    image = np.load("basic_elements/feature_gen/test_image.npy")
 
     # Plot the feature
     haar_feature.plot(grayscale_image=image)
 
-    # Compute the integral image
-    padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
-    intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
-
-    # Evaluate the feature at position (0, 0)
-    feat_val = haar_feature.evaluate(intgr_image, shift_x=0, shift_y=0)
-
-    print(f"Feature value at (0, 0): {feat_val}")
-
     # Scale and recenter the feature at (5, 5)
     haar_feature.scale(0.5)
     haar_feature.plot(grayscale_image=image, shift_x=5, shift_y=5)
-    feat_val_scaled = haar_feature.evaluate(intgr_image, shift_x=5, shift_y=5)
-
-    print(f"Feature value at {5, 5}: {feat_val_scaled}")
