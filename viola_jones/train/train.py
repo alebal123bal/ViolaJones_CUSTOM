@@ -45,15 +45,15 @@ if __name__ == "__main__":
     feature_matrix, weights, labels = load_matrix_weights_labels()
 
     # Create an AdaBoost classifier with the loaded feature matrix
-    adaboost_classifier = AdaBoost(
-        feature_eval_matrix=feature_matrix,
-        sample_weights=weights,
-        sample_labels=labels,
-        n_stages=3,
-    )
+    # adaboost_classifier = AdaBoost(
+    #     feature_eval_matrix=feature_matrix,
+    #     sample_weights=weights,
+    #     sample_labels=labels,
+    #     n_stages=3,
+    # )
 
-    # Train the classifier
-    adaboost_classifier.train()
+    # # Train the classifier
+    # adaboost_classifier.train()
 
     end_time = time.time()
     print(f"✅ Training completed in {end_time - start_time:.2f} seconds.\n")
@@ -68,21 +68,33 @@ if __name__ == "__main__":
 
     classifier_score.analyze()
 
-    # Visualize the best features
-    for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
-        for feature_dict in stage:
-            feature = haar_features[feature_dict["feature_idx"]]
-            feature.plot(grayscale_image=face_images[1])
-
     # Save the trained classifier with the feature objects too
     my_classifier = []
 
     for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
         for feature_dict in stage:
+            # Retrieve the Haar feature object using the index
             feature = haar_features[feature_dict["feature_idx"]]
-            my_classifier.append(feature)
+
+            # Append the feature information along with the feature object
+            my_classifier.append(
+                {
+                    "feature_idx": feature_dict["feature_idx"],
+                    "threshold": feature_dict["threshold"],
+                    "direction": feature_dict["direction"],
+                    "error": feature_dict["error"],
+                    "alpha": feature_dict["alpha"],
+                    "feature": feature,
+                }
+            )
 
     save_pickle_obj(
         my_classifier,
         "full_trained_classifier.pkl",
     )
+
+    # Visualize the best features
+    for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
+        for feature_dict in stage:
+            feature = haar_features[feature_dict["feature_idx"]]
+            feature.plot(grayscale_image=face_images[1])
