@@ -23,7 +23,17 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Load Haar features eliminating the corner features
-    haar_features = generate_all_haar_features(x_start=4, y_start=2)
+    haar_features = generate_all_haar_features(
+        feature_types=[
+            "horizontal_2",
+            "vertical_2",
+            "horizontal_3",
+            "vertical_3",
+            "eye_like_horizontal",
+        ],
+        x_start=4,
+        y_start=2,
+    )
 
     # Load face images from the dataset folder and limit to a images
     face_images = load_images_from_folder(FACE_PATH)

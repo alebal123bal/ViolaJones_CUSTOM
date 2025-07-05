@@ -206,6 +206,45 @@ def generate_four_rectangle_diagonal(
     return features
 
 
+def generate_eye_like_horizontal(
+    window_size: Tuple[int, int] = (22, 22),
+    x_start: int = 0,
+    y_start: int = 0,
+) -> List[HaarFeature]:
+    """
+    Generate eye-like horizontal features (dark-light-dark pattern).
+    Useful for detecting eye regions with bright areas between dark eyebrows/eyes.
+
+    Args:
+        window_size: Tuple of (width, height) for the detection window
+        x_start: Starting x coordinate for feature generation
+        y_start: Starting y coordinate for feature generation
+
+    Returns:
+        List of HaarFeature objects
+    """
+    features = []
+    width, height = window_size
+
+    for pol in (1, -1):
+        for y in range(y_start, height - y_start - 1):
+            for x in range(x_start, width - x_start - 2):  # Need at least 3 rectangles
+                for h in range(2, height - y + 1):
+                    for w in range(3, width - x, 3):  # Widths divisible by 3
+                        if x + w <= width:
+                            rect_width = w // 3
+                            rect1 = Rectangle(x, y, rect_width, h, -pol)  # Dark
+                            rect2 = Rectangle(
+                                x + rect_width, y, rect_width, h, pol
+                            )  # Light
+                            rect3 = Rectangle(
+                                x + 2 * rect_width, y, rect_width, h, -pol
+                            )  # Dark
+                            features.append(HaarFeature([rect1, rect2, rect3]))
+
+    return features
+
+
 def generate_all_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -233,6 +272,7 @@ def generate_all_haar_features(
             "horizontal_3",
             "vertical_3",
             "diagonal_4",
+            "eye_like_horizontal",
         ]
 
     all_features = []
@@ -264,13 +304,24 @@ def generate_all_haar_features(
         all_features.extend(features)
         print(f"Generated {len(features)} four-rectangle diagonal features")
 
+    if "eye_like_horizontal" in feature_types:
+        features = generate_eye_like_horizontal(window_size, x_start, y_start)
+        all_features.extend(features)
+        print(f"Generated {len(features)} eye-like horizontal features")
+
     print(f"Total features generated: {len(all_features)}\n")
     return all_features
 
 
 # Example
 if __name__ == "__main__":
-    my_features = generate_all_haar_features(x_start=4, y_start=2)
+    my_features = generate_all_haar_features(
+        feature_types=[
+            "eye_like_horizontal",
+        ],
+        x_start=4,
+        y_start=2,
+    )
 
     # Import a grayscale image for testing
     import numpy as np
@@ -288,7 +339,7 @@ if __name__ == "__main__":
     # Use the nth image for testing
     image = face_images[0]
 
-    for i, feat in enumerate(my_features[0:5]):
+    for i, feat in enumerate(my_features[0:10]):
 
         # Compute the integral image
         padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
