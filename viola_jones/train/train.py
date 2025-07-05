@@ -20,11 +20,11 @@ if __name__ == "__main__":
     # Load Haar features eliminating the corner features
     haar_features = generate_all_haar_features(x_start=4, y_start=2)
 
-    # Load face images from the dataset folder and limit to 2000 images
-    face_images = load_images_from_folder(FACE_PATH)[0:2000]
+    # Load face images from the dataset folder and limit to a images
+    face_images = load_images_from_folder(FACE_PATH)
 
-    # Load non-face images from the dataset folder and limit to 5000 images
-    not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:5000]
+    # Load non-face images from the dataset folder and limit to b images
+    not_face_images = load_images_from_folder(NOT_FACE_PATH)
 
     # Compute integral images for both face and non-face images
     integral_images = compute_integral_images(face_images + not_face_images)

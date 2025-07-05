@@ -388,7 +388,8 @@ def create_matrix_weights_labels(
     )
 
     # Analyze the matrix to determine if clipping is safe
-    do_clipping = _analyze_matrix(matrix=mat)
+    # do_clipping = _analyze_matrix(matrix=mat)
+    do_clipping = True
 
     # If clipping is safe, clip the matrix
     if do_clipping:
