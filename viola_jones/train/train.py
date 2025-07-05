@@ -45,15 +45,15 @@ if __name__ == "__main__":
     feature_matrix, weights, labels = load_matrix_weights_labels()
 
     # Create an AdaBoost classifier with the loaded feature matrix
-    # adaboost_classifier = AdaBoost(
-    #     feature_eval_matrix=feature_matrix,
-    #     sample_weights=weights,
-    #     sample_labels=labels,
-    #     n_stages=3,
-    # )
+    adaboost_classifier = AdaBoost(
+        feature_eval_matrix=feature_matrix,
+        sample_weights=weights,
+        sample_labels=labels,
+        n_stages=3,
+    )
 
-    # # Train the classifier
-    # adaboost_classifier.train()
+    # Train the classifier
+    adaboost_classifier.train()
 
     end_time = time.time()
     print(f"✅ Training completed in {end_time - start_time:.2f} seconds.\n")
@@ -72,12 +72,13 @@ if __name__ == "__main__":
     my_classifier = []
 
     for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
+        stage_haar_features = []
         for feature_dict in stage:
             # Retrieve the Haar feature object using the index
             feature = haar_features[feature_dict["feature_idx"]]
 
             # Append the feature information along with the feature object
-            my_classifier.append(
+            stage_haar_features.append(
                 {
                     "feature_idx": feature_dict["feature_idx"],
                     "threshold": feature_dict["threshold"],
@@ -87,6 +88,7 @@ if __name__ == "__main__":
                     "feature": feature,
                 }
             )
+        my_classifier.append(stage_haar_features)
 
     save_pickle_obj(
         my_classifier,
@@ -94,7 +96,7 @@ if __name__ == "__main__":
     )
 
     # Visualize the best features
-    for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
+    for stage in load_pickle_obj("_pickle_folder/full_trained_classifier.pkl"):
         for feature_dict in stage:
-            feature = haar_features[feature_dict["feature_idx"]]
+            feature = feature_dict["feature"]
             feature.plot(grayscale_image=face_images[1])
