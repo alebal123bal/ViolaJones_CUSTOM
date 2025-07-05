@@ -45,13 +45,13 @@ def get_matrix_weights_labels(
     # Load Haar features and integral images if not provided
     if haar_features is None:
         print("Haar features not provided. Generating all Haar features...\n")
-        haar_features = generate_all_haar_features()[0:12]
+        haar_features = generate_all_haar_features()
     if face_images is None:
         print("Face images not provided. Loading images from folders...\n")
-        face_images = load_images_from_folder(FACE_PATH)[0:6]
+        face_images = load_images_from_folder(FACE_PATH)
     if not_face_images is None:
         print("Not-Face images not provided. Loading images from folders...\n")
-        not_face_images = load_images_from_folder(NOT_FACE_PATH)[0:4]
+        not_face_images = load_images_from_folder(NOT_FACE_PATH)
 
     # Compute integral images for the provided face and not-face images
     integral_images = compute_integral_images(face_images + not_face_images)
@@ -84,7 +84,7 @@ def get_matrix_weights_labels(
 
     # Assign weights inversely proportional to class size
     # TODO increase weights for faces
-    weights[:num_faces] = 1.0 / num_faces  # Face weights
+    weights[:num_faces] = 5.0 / num_faces  # Face weights
     weights[num_faces:] = 1.0 / num_non_faces  # Non-face weights
 
     # Normalize so weights sum to 1
@@ -258,7 +258,7 @@ def _analyze_matrix(matrix):
 
     if clipping_percentage < 0.01:
         print(
-            "✅ Very few values would be clipped (<0.01%) - int16 conversion recommended"
+            "Very few values would be clipped (<0.01%) - int16 conversion recommended"
         )
         return True
     if clipping_percentage < 0.1:
@@ -269,6 +269,7 @@ def _analyze_matrix(matrix):
     if clipping_percentage < 1.0:
         print("⚠️  Moderate clipping (<1%) - test int16 performance vs memory trade-off")
         return True
+
     print("❌ Significant clipping (>1%) - int16 conversion may hurt model performance")
     return False
 
@@ -354,7 +355,7 @@ def create(haar_features=None, face_images=None, not_face_images=None):
 
     end_time = time.time()
     elapsed_time = end_time - start_time
-    print(f"\nFeature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
+    print(f"\n✅ Feature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
 
 
 # Example usage
