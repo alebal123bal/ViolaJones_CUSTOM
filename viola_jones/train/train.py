@@ -12,7 +12,12 @@ from matrix_creator.feature_eval_matrix_maker import (
     FACE_PATH,
     NOT_FACE_PATH,
 )
-from AdaBoost_smart.adaboost import AdaBoost, ClassifierScoreCheck
+from AdaBoost_smart.adaboost import (
+    AdaBoost,
+    ClassifierScoreCheck,
+    save_pickle_obj,
+    load_pickle_obj,
+)
 
 if __name__ == "__main__":
     start_time = time.time()
@@ -64,7 +69,20 @@ if __name__ == "__main__":
     classifier_score.analyze()
 
     # Visualize the best features
-    for stage in adaboost_classifier.trained_classifier:
+    for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
         for feature_dict in stage:
             feature = haar_features[feature_dict["feature_idx"]]
-            feature.plot(grayscale_image=face_images[0])
+            feature.plot(grayscale_image=face_images[1])
+
+    # Save the trained classifier with the feature objects too
+    my_classifier = []
+
+    for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
+        for feature_dict in stage:
+            feature = haar_features[feature_dict["feature_idx"]]
+            my_classifier.append(feature)
+
+    save_pickle_obj(
+        my_classifier,
+        "full_trained_classifier.pkl",
+    )
