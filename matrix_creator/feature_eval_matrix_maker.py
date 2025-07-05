@@ -352,7 +352,7 @@ def clip(matrix, weights, labels, dtype=np.int16, chunk_size=10000):
             np.clip(chunk, INT16_MIN, INT16_MAX, out=chunk)  # In-place clip
             clipped_matrix[i:end_idx] = chunk.astype(dtype)
 
-            if i % (chunk_size * 10) == 0:  # Progress update
+            if i % chunk_size == 0:  # Progress update
                 print(f"Processed {i}/{matrix.shape[0]} rows...")
 
         return clipped_matrix, weights, labels
