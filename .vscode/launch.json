@@ -80,6 +80,22 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false
+        },
+        {
+            "name": "Debug Window Slide",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "viola_jones.inference.window_slide",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Window Slide",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "viola_jones.inference.window_slide",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
         }
     ]
 }
