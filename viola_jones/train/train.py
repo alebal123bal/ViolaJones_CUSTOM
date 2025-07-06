@@ -30,6 +30,7 @@ if __name__ == "__main__":
             "horizontal_3",
             "vertical_3",
             "eye_like_horizontal",
+            "nose_bridge",
         ],
         x_start=4,
         y_start=2,
