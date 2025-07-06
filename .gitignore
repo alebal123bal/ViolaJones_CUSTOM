@@ -1,7 +1,7 @@
 data_preprocess/
 image_manager/training_set
 matrix_creator/eval_matrix_weights_labels
-viola_jones/inference
+viola_jones/inference/test_image
 # Ignore Python cache files
 __pycache__/
 _pickle_folder/ 
