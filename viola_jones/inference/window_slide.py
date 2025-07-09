@@ -89,8 +89,8 @@ def window_slide(image_path: str, classifier_path: str):
     adaboost_classifier = load_pickle_obj(os.path.join(cwd, classifier_path))
 
     # Perform window sliding to detect faces
-    for y in range(0, test_image.shape[0] - 22, 5):
-        for x in range(0, test_image.shape[1] - 22, 5):
+    for y in range(0, test_image.shape[0] - 22, 3):
+        for x in range(0, test_image.shape[1] - 22, 3):
             # Extract the window from the image
             window = test_image[y : y + 22, x : x + 22]
 
@@ -98,7 +98,7 @@ def window_slide(image_path: str, classifier_path: str):
             integral_window = compute_integral_image(window)
 
             # Classify the window using the trained classifier
-            cascade_prediction(
+            _ = cascade_prediction(
                 classifier=adaboost_classifier,
                 grayscale_image=window,
                 integral_image=integral_window,
