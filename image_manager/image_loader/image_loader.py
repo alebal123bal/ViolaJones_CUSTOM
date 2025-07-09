@@ -62,7 +62,7 @@ def load_images_from_folder(folder):
 
     images = []
 
-    print(f"\nLoading images from folder: {folder}")
+    print(f"📁 Loading images from folder: {folder}")
     for filename in os.listdir(folder):
         if (
             filename.endswith(".png")
@@ -74,7 +74,7 @@ def load_images_from_folder(folder):
             img_array = np.array(img)
             images.append(img_array)
 
-    print("Done.\n")
+    print("✅ Done.\n")
 
     return images
 

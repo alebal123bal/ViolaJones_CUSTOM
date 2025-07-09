@@ -88,6 +88,8 @@ def window_slide(image_path: str, classifier_path: str):
     # Load the trained classifier
     adaboost_classifier = load_pickle_obj(os.path.join(cwd, classifier_path))
 
+    # TODO: find a way to intelligently do non-maximum suppression
+
     # Perform window sliding to detect faces
     for y in range(0, test_image.shape[0] - 22, 3):
         for x in range(0, test_image.shape[1] - 22, 3):

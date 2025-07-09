@@ -68,7 +68,7 @@ if __name__ == "__main__":
     adaboost_classifier.train()
 
     end_time = time.time()
-    print(f"✅ Training completed in {end_time - start_time:.2f} seconds.\n")
+    print(f"⏱️ Training completed in {end_time - start_time:.2f} seconds.\n")
 
     # Reload the feature evaluation matrix and labels
     feature_matrix, _, labels = load_matrix_weights_labels()

@@ -161,7 +161,7 @@ def save_matrix_weights_labels(
     np.save(os.path.join(folder, "weights.npy"), weights)
     np.save(os.path.join(folder, "labels.npy"), labels)
 
-    print(f"\nSaved feature evaluation matrix, weights, and labels to {folder}.\n")
+    print(f"\n💾 Saved feature evaluation matrix, weights, and labels to {folder}.\n")
 
 
 def load_matrix_weights_labels(folder=MATRIX_PATH):
@@ -178,7 +178,7 @@ def load_matrix_weights_labels(folder=MATRIX_PATH):
     weights = np.load(os.path.join(folder, "weights.npy"))
     labels = np.load(os.path.join(folder, "labels.npy"))
 
-    print(f"Loaded feature evaluation matrix, weights, and labels from {folder}")
+    print(f"\n📁 Loaded feature evaluation matrix, weights, and labels from {folder}\n")
 
     return matrix, weights, labels
 
@@ -323,7 +323,7 @@ def clip(matrix, weights, labels, dtype=np.int16, chunk_size=10000):
     """
 
     if dtype == np.int16:
-        print("\nClipping matrix to fit within int16 range (-32768 to 32767)...")
+        print("\n🔄 Clipping matrix to fit within int16 range (-32768 to 32767)...")
         print(f"Processing in chunks of {chunk_size} rows...")
 
         # Create output array
@@ -339,7 +339,7 @@ def clip(matrix, weights, labels, dtype=np.int16, chunk_size=10000):
             clipped_matrix[i:end_idx] = chunk.astype(dtype)
 
             if i % chunk_size == 0:  # Progress update
-                print(f"Processed {i}/{matrix.shape[0]} rows...")
+                print(f"📦 Processed {i}/{matrix.shape[0]} rows...")
 
         return clipped_matrix, weights, labels
 
@@ -363,7 +363,7 @@ def create_matrix_weights_labels(
 
     # Check if the matrix, weights, and labels already exist
     if exists_matrix_weights_labels(folder=MATRIX_PATH):
-        print("\nMatrix, weights, and labels already exist. Returning.\n")
+        print("\n🧮 Matrix, weights, and labels already exist. Returning.\n")
         return
 
     # Create the feature evaluation matrix
@@ -381,7 +381,7 @@ def create_matrix_weights_labels(
     if do_clipping:
         mat, w, l = clip(mat, w, l, dtype=np.int16)
     else:
-        print("Clipping unsafe - keeping original matrix.")
+        print("❌ Clipping unsafe - keeping original matrix.")
 
     # Save the matrix, weights, and labels to a file
     save_matrix_weights_labels(
@@ -393,7 +393,7 @@ def create_matrix_weights_labels(
 
     end_time = time.time()
     elapsed_time = end_time - start_time
-    print(f"\n✅ Feature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
+    print(f"\n⏱️ Feature evaluation matrix created in {elapsed_time:.2f} seconds.\n")
 
 
 # Example usage
