@@ -62,6 +62,7 @@ if __name__ == "__main__":
         sample_labels=labels,
         n_stages=3,
         aggressivness=0.4,
+        feature_per_stage=4,
     )
 
     # Train the classifier
