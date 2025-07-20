@@ -143,18 +143,18 @@ class HaarFeature:
             )
 
             # Add numeric values in each grid square (BACKGROUND STAYS FIXED)
-            for i in range(height):
-                for j in range(width):
-                    ax.text(
-                        j + 0.5,
-                        i + 0.5,  # Use i directly (no more flipping)
-                        str(int(grayscale_image[i, j])),
-                        ha="center",
-                        va="center",
-                        fontsize=8,
-                        fontweight="bold",
-                        color="red",
-                    )
+            # for i in range(height):
+            #     for j in range(width):
+            #         ax.text(
+            #             j + 0.5,
+            #             i + 0.5,  # Use i directly (no more flipping)
+            #             str(int(grayscale_image[i, j])),
+            #             ha="center",
+            #             va="center",
+            #             fontsize=8,
+            #             fontweight="bold",
+            #             color="red",
+            #         )
 
         # Draw the Haar feature window border in green (SHIFTED POSITION)
         border_thickness = 0.15  # How much to inset the border
