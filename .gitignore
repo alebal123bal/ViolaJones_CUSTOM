@@ -1,4 +1,3 @@
-data_preprocess/
 image_manager/training_set
 matrix_creator/eval_matrix_weights_labels
 viola_jones/inference/test_image

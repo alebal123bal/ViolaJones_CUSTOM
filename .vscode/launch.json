@@ -34,6 +34,22 @@
             "stopOnEntry": false
         },
         {
+            "name": "Debug Random Image Adder",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "image_manager.data_preprocess.data_preprocess",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Random Image Adder",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "image_manager.data_preprocess.data_preprocess",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
+        },
+        {
             "name": "Debug Image Loader",
             "type": "debugpy",
             "request": "launch",
