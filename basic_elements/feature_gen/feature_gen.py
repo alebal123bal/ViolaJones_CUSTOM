@@ -267,45 +267,6 @@ def generate_eye_like_horizontal(
     return features
 
 
-def generate_nose_bridge_vertical(
-    window_size: Tuple[int, int] = (22, 22),
-    x_start: int = 0,
-    y_start: int = 0,
-) -> List[HaarFeature]:
-    """
-    Generate nose bridge vertical features (light-dark-light pattern).
-    Useful for detecting the nose bridge area.
-
-    Args:
-        window_size: Tuple of (width, height) for the detection window
-        x_start: Starting x coordinate for feature generation
-        y_start: Starting y coordinate for feature generation
-
-    Returns:
-        List of HaarFeature objects
-    """
-    features = []
-    width, height = window_size
-
-    for pol in (1, -1):
-        for y in range(y_start, height - y_start - 2):  # Need at least 3 rectangles
-            for x in range(x_start, width - x_start - 1):
-                for w in range(2, width - x + 1):
-                    for h in range(3, height - y, 3):  # Heights divisible by 3
-                        if y + h <= height:
-                            rect_height = h // 3
-                            rect1 = Rectangle(x, y, w, rect_height, pol)  # Light
-                            rect2 = Rectangle(
-                                x, y + rect_height, w, rect_height, -pol
-                            )  # Dark
-                            rect3 = Rectangle(
-                                x, y + 2 * rect_height, w, rect_height, pol
-                            )  # Light
-                            features.append(HaarFeature([rect1, rect2, rect3]))
-
-    return features
-
-
 def generate_all_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -371,11 +332,6 @@ def generate_all_haar_features(
         features = generate_eye_like_horizontal(window_size, x_start, y_start)
         all_features.extend(features)
         print(f"👁️ Generated {len(features)} eye-like horizontal features")
-
-    if "nose_bridge" in feature_types:
-        features = generate_nose_bridge_vertical(window_size, x_start, y_start)
-        all_features.extend(features)
-        print(f"👃 Generated {len(features)} nose bridge vertical features")
 
     print(f"📊 Total features generated: {len(all_features)}\n")
     return all_features
