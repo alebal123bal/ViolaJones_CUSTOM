@@ -34,14 +34,14 @@
             "stopOnEntry": false
         },
         {
-            "name": "Debug Random Image Adder",
+            "name": "Debug Data Preprocess",
             "type": "debugpy",
             "request": "launch",
             "module": "image_manager.data_preprocess.data_preprocess",
             "console": "integratedTerminal"
         },
         {
-            "name": "Run Random Image Adder",
+            "name": "Run Data Preprocess",
             "type": "debugpy",
             "request": "launch",
             "module": "image_manager.data_preprocess.data_preprocess",
