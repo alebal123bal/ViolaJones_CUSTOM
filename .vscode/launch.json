@@ -34,6 +34,22 @@
             "stopOnEntry": false
         },
         {
+            "name": "Debug Full Haar Feature Generation",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "basic_elements.feature_gen.feature_gen_full",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Full Haar Feature Generation",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "basic_elements.feature_gen.feature_gen_full",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false
+        },
+        {
             "name": "Debug Data Preprocess",
             "type": "debugpy",
             "request": "launch",
