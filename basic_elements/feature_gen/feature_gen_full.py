@@ -531,6 +531,7 @@ def generate_nine_rectangle_grid_full(
 def generate_all_full_coverage_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
+    step: int = 1,
 ) -> List[HaarFeature]:
     """
     Generate all full-coverage Haar features for the given window size.
@@ -635,17 +636,17 @@ def generate_all_full_coverage_haar_features(
         print(f"🎭 Generated {len(features)} six-rectangle vertical grid features")
 
     if "grid_8_horizontal_full" in feature_types:
-        features = generate_eight_rectangle_horizontal_grid_full(window_size, step=2)
+        features = generate_eight_rectangle_horizontal_grid_full(window_size, step=step)
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} eight-rectangle horizontal grid features")
 
     if "grid_8_vertical_full" in feature_types:
-        features = generate_eight_rectangle_vertical_grid_full(window_size, step=2)
+        features = generate_eight_rectangle_vertical_grid_full(window_size, step=step)
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} eight-rectangle vertical grid features")
 
     if "grid_9_full" in feature_types:
-        features = generate_nine_rectangle_grid_full(window_size, step=2)
+        features = generate_nine_rectangle_grid_full(window_size, step=step)
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} nine-rectangle grid features")
 
@@ -680,6 +681,7 @@ if __name__ == "__main__":
             "grid_9_full",
         ],
         window_size=(22, 22),
+        step=2,
     )
 
     # Import a grayscale image for testing
