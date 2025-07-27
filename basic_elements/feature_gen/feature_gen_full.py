@@ -248,6 +248,40 @@ def generate_five_rectangle_vertical_full(
     return features
 
 
+def generate_five_rectangle_horizontal_grid_full(
+    window_size: Tuple[int, int] = (22, 22),
+) -> List[HaarFeature]:
+    """
+    Generate five-rectangle grid features covering the full window.
+    Make all the possible combinations for a hardcoded 22x22 window.
+    The grid is divided as follows: 2 rectangles on top, one rectangle in the middle,
+    and 2 rectangles on the bottom.
+    """
+
+    features = []
+    width, height = window_size
+
+    # Split into 5 rectangles: 2 on top, 1 in the middle, 2 on bottom
+    for h1 in range(1, height - 2):
+        for h2 in range(1, height - h1 - 1):
+            h3 = height - h1 - h2
+            if h3 <= 0:
+                continue
+            for w1 in range(1, width - 1):
+                w2 = width - w1
+                if w2 <= 0:
+                    continue
+                for pol in (1, -1):
+                    rect1 = Rectangle(0, 0, w1, h1, pol)
+                    rect2 = Rectangle(w1, 0, w2, h1, -pol)
+                    rect3 = Rectangle(0, h1, width, h2, pol)
+                    rect4 = Rectangle(0, h1 + h2, w1, h3, -pol)
+                    rect5 = Rectangle(w1, h1 + h2, w2, h3, pol)
+                    features.append(HaarFeature([rect1, rect2, rect3, rect4, rect5]))
+
+    return features
+
+
 def generate_all_full_coverage_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -258,8 +292,6 @@ def generate_all_full_coverage_haar_features(
     Args:
         window_size: Tuple of (width, height) for the detection window
         feature_types: List of feature types to generate. If None, generates all types.
-        Valid types: ['horizontal_2', 'vertical_2', 'horizontal_3', 'vertical_3',
-                     'grid_4', 'strips_4', 'cross_5', 'grid_6', 'center_7', 'border_8', 'grid_9']
 
     Returns:
         List of all generated HaarFeature objects
@@ -276,6 +308,7 @@ def generate_all_full_coverage_haar_features(
             "vertical_4_full",
             "horizontal_5_full",
             "vertical_5_full",
+            "grid_5_horizontal_full",
         ]
 
     all_features = []
@@ -329,6 +362,11 @@ def generate_all_full_coverage_haar_features(
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} five-rectangle vertical features")
 
+    if "grid_5_horizontal_full" in feature_types:
+        features = generate_five_rectangle_horizontal_grid_full(window_size)
+        all_features.extend(features)
+        print(f"🎭 Generated {len(features)} five-rectangle horizontal grid features")
+
     print(f"📊 Total full-coverage features generated: {len(all_features)}\n")
     return all_features
 
@@ -351,7 +389,8 @@ if __name__ == "__main__":
             # "vertical_4_full",
             # "grid_4_full",
             # "horizontal_5_full",
-            "vertical_5_full",
+            # "vertical_5_full",
+            "grid_5_horizontal_full",
         ],
         window_size=(22, 22),
     )
@@ -361,7 +400,7 @@ if __name__ == "__main__":
         os.path.join(os.getcwd(), "basic_elements", "feature_gen", "test_image.png")
     )
 
-    for i, feat in enumerate(my_features[0:]):
+    for i, feat in enumerate(my_features[3500:]):
         # Compute the integral image
         padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
         intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
