@@ -282,6 +282,40 @@ def generate_five_rectangle_horizontal_grid_full(
     return features
 
 
+def generate_five_rectangle_vertical_grid_full(
+    window_size: Tuple[int, int] = (22, 22),
+) -> List[HaarFeature]:
+    """
+    Generate five-rectangle vertical grid features covering the full window.
+    Make all the possible combinations for a hardcoded 22x22 window.
+    The grid is divided as follows: 2 rectangles on the left, one rectangle in the middle,
+    and 2 rectangles on the right.
+    """
+
+    features = []
+    width, height = window_size
+
+    # Split into 5 rectangles: 2 on left, 1 in the middle, 2 on right
+    for w1 in range(1, width - 2):
+        for w2 in range(1, width - w1 - 1):
+            w3 = width - w1 - w2
+            if w3 <= 0:
+                continue
+            for h1 in range(1, height - 1):
+                h2 = height - h1
+                if h2 <= 0:
+                    continue
+                for pol in (1, -1):
+                    rect1 = Rectangle(0, 0, w1, h1, pol)
+                    rect2 = Rectangle(0, h1, w1, h2, -pol)
+                    rect3 = Rectangle(w1, 0, w2, height, pol)
+                    rect4 = Rectangle(w1 + w2, 0, w3, h1, -pol)
+                    rect5 = Rectangle(w1 + w2, h1, w3, h2, pol)
+                    features.append(HaarFeature([rect1, rect2, rect3, rect4, rect5]))
+
+    return features
+
+
 def generate_all_full_coverage_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -309,6 +343,7 @@ def generate_all_full_coverage_haar_features(
             "horizontal_5_full",
             "vertical_5_full",
             "grid_5_horizontal_full",
+            "grid_5_vertical_full",
         ]
 
     all_features = []
@@ -367,6 +402,11 @@ def generate_all_full_coverage_haar_features(
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} five-rectangle horizontal grid features")
 
+    if "grid_5_vertical_full" in feature_types:
+        features = generate_five_rectangle_vertical_grid_full(window_size)
+        all_features.extend(features)
+        print(f"🎭 Generated {len(features)} five-rectangle vertical grid features")
+
     print(f"📊 Total full-coverage features generated: {len(all_features)}\n")
     return all_features
 
@@ -390,7 +430,8 @@ if __name__ == "__main__":
             # "grid_4_full",
             # "horizontal_5_full",
             # "vertical_5_full",
-            "grid_5_horizontal_full",
+            # "grid_5_horizontal_full",
+            "grid_5_vertical_full",
         ],
         window_size=(22, 22),
     )
