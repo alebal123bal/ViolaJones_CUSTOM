@@ -156,6 +156,34 @@ def generate_four_rectangle_horizontal_full(
     return features
 
 
+def generate_four_rectangle_vertical_full(
+    window_size: Tuple[int, int] = (22, 22),
+) -> List[HaarFeature]:
+    """
+    Generate four-rectangle vertical features covering the full window.
+    Make all the possible combinations for a hardcoded 22x22 window.
+    Example: (1, 1, 1, 20), (1, 1, 2, 19), (1, 1, 3, 18), ..., (20, 1, 1, 1)
+    """
+
+    features = []
+    width, height = window_size
+
+    for h1 in range(1, height - 2):
+        for h2 in range(1, height - h1 - 1):
+            for h3 in range(1, height - h1 - h2):
+                h4 = height - h1 - h2 - h3
+                if h4 <= 0:
+                    continue
+                for pol in (1, -1):
+                    rect1 = Rectangle(0, 0, width, h1, pol)
+                    rect2 = Rectangle(0, h1, width, h2, -pol)
+                    rect3 = Rectangle(0, h1 + h2, width, h3, pol)
+                    rect4 = Rectangle(0, h1 + h2 + h3, width, h4, -pol)
+                    features.append(HaarFeature([rect1, rect2, rect3, rect4]))
+
+    return features
+
+
 def generate_all_full_coverage_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -181,6 +209,7 @@ def generate_all_full_coverage_haar_features(
             "vertical_3_full",
             "grid_4_full",
             "horizontal_4_full",
+            "vertical_4_full",
         ]
 
     all_features = []
@@ -219,6 +248,11 @@ def generate_all_full_coverage_haar_features(
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} four-rectangle horizontal features")
 
+    if "vertical_4_full" in feature_types:
+        features = generate_four_rectangle_vertical_full(window_size)
+        all_features.extend(features)
+        print(f"🎭 Generated {len(features)} four-rectangle vertical features")
+
     print(f"📊 Total full-coverage features generated: {len(all_features)}\n")
     return all_features
 
@@ -238,7 +272,8 @@ if __name__ == "__main__":
             # "horizontal_3_full",
             # "vertical_3_full",
             # "grid_4_full",
-            "horizontal_4_full"
+            # "horizontal_4_full"
+            "vertical_4_full",
         ],
         window_size=(22, 22),
     )
