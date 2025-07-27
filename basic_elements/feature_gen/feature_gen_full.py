@@ -391,6 +391,7 @@ def generate_six_rectangle_vertical_grid_full(
 
 def generate_eight_rectangle_horizontal_grid_full(
     window_size: Tuple[int, int] = (22, 22),
+    step=1,
 ) -> List[HaarFeature]:
     """
     Generate eight-rectangle horizontal grid features covering the full window.
@@ -402,13 +403,13 @@ def generate_eight_rectangle_horizontal_grid_full(
     width, height = window_size
 
     # Split into 8 rectangles: 4 on top, 4 on bottom
-    for h1 in range(1, height - 3):
+    for h1 in range(1, height - 3, step):
         h2 = height - h1
         if h2 <= 0:
             continue
-        for w1 in range(1, width - 3):
-            for w2 in range(1, width - w1 - 2):
-                for w3 in range(1, width - w1 - w2 - 1):
+        for w1 in range(1, width - 3, step):
+            for w2 in range(1, width - w1 - 2, step):
+                for w3 in range(1, width - w1 - w2 - 1, step):
                     w4 = width - w1 - w2 - w3
                     if w4 <= 0:
                         continue
@@ -432,6 +433,7 @@ def generate_eight_rectangle_horizontal_grid_full(
 
 def generate_eight_rectangle_vertical_grid_full(
     window_size: Tuple[int, int] = (22, 22),
+    step=1,
 ) -> List[HaarFeature]:
     """
     Generate eight-rectangle vertical grid features covering the full window.
@@ -444,13 +446,13 @@ def generate_eight_rectangle_vertical_grid_full(
     width, height = window_size
 
     # Split into 8 rectangles: 4 on left, 4 on right
-    for w1 in range(1, width - 3):
+    for w1 in range(1, width - 3, step):
         w2 = width - w1
         if w2 <= 0:
             continue
-        for h1 in range(1, height - 3):
-            for h2 in range(1, height - h1 - 2):
-                for h3 in range(1, height - h1 - h2 - 1):
+        for h1 in range(1, height - 3, step):
+            for h2 in range(1, height - h1 - 2, step):
+                for h3 in range(1, height - h1 - h2 - 1, step):
                     h4 = height - h1 - h2 - h3
                     if h4 <= 0:
                         continue
@@ -474,6 +476,7 @@ def generate_eight_rectangle_vertical_grid_full(
 
 def generate_nine_rectangle_grid_full(
     window_size: Tuple[int, int] = (22, 22),
+    step=1,
 ) -> List[HaarFeature]:
     """
     Generate nine-rectangle grid features covering the full window.
@@ -486,13 +489,13 @@ def generate_nine_rectangle_grid_full(
     width, height = window_size
 
     # Split into 9 rectangles: 3 on top, 3 in middle, 3 on bottom
-    for h1 in range(1, height - 4):
-        for h2 in range(1, height - h1 - 3):
+    for h1 in range(1, height - 4, step):
+        for h2 in range(1, height - h1 - 3, step):
             h3 = height - h1 - h2
             if h3 <= 0:
                 continue
-            for w1 in range(1, width - 2):
-                for w2 in range(1, width - w1 - 1):
+            for w1 in range(1, width - 2, step):
+                for w2 in range(1, width - w1 - 1, step):
                     w3 = width - w1 - w2
                     if w3 <= 0:
                         continue
@@ -632,17 +635,17 @@ def generate_all_full_coverage_haar_features(
         print(f"🎭 Generated {len(features)} six-rectangle vertical grid features")
 
     if "grid_8_horizontal_full" in feature_types:
-        features = generate_eight_rectangle_horizontal_grid_full(window_size)
+        features = generate_eight_rectangle_horizontal_grid_full(window_size, step=2)
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} eight-rectangle horizontal grid features")
 
     if "grid_8_vertical_full" in feature_types:
-        features = generate_eight_rectangle_vertical_grid_full(window_size)
+        features = generate_eight_rectangle_vertical_grid_full(window_size, step=2)
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} eight-rectangle vertical grid features")
 
     if "grid_9_full" in feature_types:
-        features = generate_nine_rectangle_grid_full(window_size)
+        features = generate_nine_rectangle_grid_full(window_size, step=2)
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} nine-rectangle grid features")
 
@@ -664,8 +667,7 @@ if __name__ == "__main__":
             # "vertical_2_full",
             # "horizontal_3_full",
             # "vertical_3_full",
-            # "horizontal_4_full"
-            # "vertical_4_full",
+            # "horizontal_4_full" "vertical_4_full",
             # "grid_4_full",
             # "horizontal_5_full",
             # "vertical_5_full",
@@ -685,7 +687,7 @@ if __name__ == "__main__":
         os.path.join(os.getcwd(), "basic_elements", "feature_gen", "test_image.png")
     )
 
-    for i, feat in enumerate(my_features[0:]):
+    for i, feat in enumerate(my_features[-10:-1]):
         # Compute the integral image
         padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
         intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
