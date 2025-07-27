@@ -528,6 +528,69 @@ def generate_nine_rectangle_grid_full(
     return features
 
 
+def generate_twelve_rectangle_horizontal_grid_full(
+    window_size: Tuple[int, int] = (22, 22),
+    step: int = 1,
+) -> List[HaarFeature]:
+    """
+    Generate twelve-rectangle horizontal grid features covering the full window.
+    Make all the possible combinations for a hardcoded 22x22 window.
+    The grid is divided as follows: 4 rectangles on top row,
+    4 rectangles on the middle row and 4 rectangles on the bottom row.
+    Each corresponding row has rectangles of equal height.
+    Each corresponding rectangle in the same column has the same width.
+    """
+
+    features = []
+    width, height = window_size
+
+    # Split into 12 rectangles: 4 on top, 4 in middle, 4 on bottom
+    for h1 in range(1, height - 2, step):
+        for h2 in range(1, height - h1, step):
+            h3 = height - h1 - h2
+            if h3 <= 0:
+                continue
+            for w1 in range(1, width - 3, step):
+                for w2 in range(1, width - w1 - 2, step):
+                    for w3 in range(1, width - w1 - w2 - 1, step):
+                        w4 = width - w1 - w2 - w3
+                        if w4 <= 0:
+                            continue
+                        for pol in (1, -1):
+                            rect1 = Rectangle(0, 0, w1, h1, pol)
+                            rect2 = Rectangle(w1, 0, w2, h1, -pol)
+                            rect3 = Rectangle(w1 + w2, 0, w3, h1, pol)
+                            rect4 = Rectangle(w1 + w2 + w3, 0, w4, h1, -pol)
+                            rect5 = Rectangle(0, h1, w1, h2, -pol)
+                            rect6 = Rectangle(w1, h1, w2, h2, pol)
+                            rect7 = Rectangle(w1 + w2, h1, w3, h2, -pol)
+                            rect8 = Rectangle(w1 + w2 + w3, h1, w4, h2, pol)
+                            rect9 = Rectangle(0, h1 + h2, w1, h3, pol)
+                            rect10 = Rectangle(w1, h1 + h2, w2, h3, -pol)
+                            rect11 = Rectangle(w1 + w2, h1 + h2, w3, h3, pol)
+                            rect12 = Rectangle(w1 + w2 + w3, h1 + h2, w4, h3, -pol)
+                            features.append(
+                                HaarFeature(
+                                    [
+                                        rect1,
+                                        rect2,
+                                        rect3,
+                                        rect4,
+                                        rect5,
+                                        rect6,
+                                        rect7,
+                                        rect8,
+                                        rect9,
+                                        rect10,
+                                        rect11,
+                                        rect12,
+                                    ]
+                                )
+                            )
+
+    return features
+
+
 def generate_all_full_coverage_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -562,6 +625,7 @@ def generate_all_full_coverage_haar_features(
             "grid_8_horizontal_full",
             "grid_8_vertical_full",
             "grid_9_full",
+            "grid_12_horizontal_full",
         ]
 
     all_features = []
@@ -650,6 +714,13 @@ def generate_all_full_coverage_haar_features(
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} nine-rectangle grid features")
 
+    if "grid_12_horizontal_full" in feature_types:
+        features = generate_twelve_rectangle_horizontal_grid_full(
+            window_size, step=step
+        )
+        all_features.extend(features)
+        print(f"🎭 Generated {len(features)} twelve-rectangle horizontal grid features")
+
     print(f"📊 Total full-coverage features generated: {len(all_features)}\n")
     return all_features
 
@@ -678,7 +749,8 @@ if __name__ == "__main__":
             # "grid_6_vertical_full",
             # "grid_8_horizontal_full",
             # "grid_8_vertical_full",
-            "grid_9_full",
+            # "grid_9_full",
+            "grid_12_horizontal_full",
         ],
         window_size=(22, 22),
         step=2,
