@@ -472,6 +472,59 @@ def generate_eight_rectangle_vertical_grid_full(
     return features
 
 
+def generate_nine_rectangle_grid_full(
+    window_size: Tuple[int, int] = (22, 22),
+) -> List[HaarFeature]:
+    """
+    Generate nine-rectangle grid features covering the full window.
+    Make all the possible combinations for a hardcoded 22x22 window.
+    The grid is divided as follows: 3 rectangles on top row, 3 in the middle row,
+    and 3 on the bottom row.
+    """
+
+    features = []
+    width, height = window_size
+
+    # Split into 9 rectangles: 3 on top, 3 in middle, 3 on bottom
+    for h1 in range(1, height - 4):
+        for h2 in range(1, height - h1 - 3):
+            h3 = height - h1 - h2
+            if h3 <= 0:
+                continue
+            for w1 in range(1, width - 2):
+                for w2 in range(1, width - w1 - 1):
+                    w3 = width - w1 - w2
+                    if w3 <= 0:
+                        continue
+                    for pol in (1, -1):
+                        rect1 = Rectangle(0, 0, w1, h1, pol)
+                        rect2 = Rectangle(w1, 0, w2, h1, -pol)
+                        rect3 = Rectangle(w1 + w2, 0, w3, h1, pol)
+                        rect4 = Rectangle(0, h1, w1, h2, -pol)
+                        rect5 = Rectangle(w1, h1, w2, h2, pol)
+                        rect6 = Rectangle(w1 + w2, h1, w3, h2, -pol)
+                        rect7 = Rectangle(0, h1 + h2, w1, h3, pol)
+                        rect8 = Rectangle(w1, h1 + h2, w2, h3, -pol)
+                        rect9 = Rectangle(w1 + w2, h1 + h2, w3, h3, pol)
+                        features.append(
+                            HaarFeature(
+                                [
+                                    rect1,
+                                    rect2,
+                                    rect3,
+                                    rect4,
+                                    rect5,
+                                    rect6,
+                                    rect7,
+                                    rect8,
+                                    rect9,
+                                ]
+                            )
+                        )
+
+    return features
+
+
 def generate_all_full_coverage_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -504,6 +557,7 @@ def generate_all_full_coverage_haar_features(
             "grid_6_vertical_full",
             "grid_8_horizontal_full",
             "grid_8_vertical_full",
+            "grid_9_full",
         ]
 
     all_features = []
@@ -587,6 +641,11 @@ def generate_all_full_coverage_haar_features(
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} eight-rectangle vertical grid features")
 
+    if "grid_9_full" in feature_types:
+        features = generate_nine_rectangle_grid_full(window_size)
+        all_features.extend(features)
+        print(f"🎭 Generated {len(features)} nine-rectangle grid features")
+
     print(f"📊 Total full-coverage features generated: {len(all_features)}\n")
     return all_features
 
@@ -615,7 +674,8 @@ if __name__ == "__main__":
             # "grid_6_horizontal_full",
             # "grid_6_vertical_full",
             # "grid_8_horizontal_full",
-            "grid_8_vertical_full",
+            # "grid_8_vertical_full",
+            "grid_9_full",
         ],
         window_size=(22, 22),
     )
