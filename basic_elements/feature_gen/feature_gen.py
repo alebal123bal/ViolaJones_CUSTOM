@@ -9,37 +9,55 @@ from basic_elements.haar_feature.haar_feature import HaarFeature
 
 def generate_two_rectangle_horizontal(
     window_size: Tuple[int, int] = (22, 22),
-    x_start: int = 0,
-    y_start: int = 0,
+    x_padding: int = 0,
+    y_padding: int = 0,
+    step: int = 1,
 ) -> List[HaarFeature]:
     """
-    Generate two-rectangle horizontal features (left-right pattern).
+    Generate all possible two-rectangle horizontal features (left-right pattern).
 
     Args:
         window_size: Tuple of (width, height) for the detection window
-        x_start: Starting x coordinate for feature generation
-        y_start: Starting y coordinate for feature generation
+        x_padding: Padding on the x-axis
+        y_padding: Padding on the y-axis
 
     Returns:
         List of HaarFeature objects
     """
+
     features = []
     width, height = window_size
 
+    # Define minimum width and height for rectangles
+    minimum_width = 1
+    minimum_height = 1
+
+    # Define maximum width and height
+    maximum_width = width - x_padding
+    maximum_height = height - y_padding
+
+    # Define minimum x and y coordinates
+    minimum_x = x_padding
+    minimum_y = y_padding
+
+    # Define maximum x and y coordinates
+    maximum_x = width - x_padding - 1
+    maximum_y = height - y_padding
+
     for pol in (1, -1):
-        # Try different positions and sizes
-        for y in range(
-            y_start, height - y_start - 1
-        ):  # -1 to ensure minimum height of 2
-            for x in range(
-                x_start, width - x_start - 1
-            ):  # -1 to ensure minimum width of 2
-                for h in range(2, height - y + 1):  # Minimum height of 2
-                    for w in range(2, width - x, 2):  # Even widths only, step by 2
-                        if x + w <= width:
-                            rect_width = w // 2
-                            rect1 = Rectangle(x, y, rect_width, h, pol)
-                            rect2 = Rectangle(x + rect_width, y, rect_width, h, -pol)
+        # Loop all possible x
+        for x in range(minimum_x, maximum_x):
+            # Loop all possible y
+            for y in range(minimum_y, maximum_y):
+                # Loop all possible widths
+                for w1 in range(minimum_width, maximum_width - x):
+                    # Loop the other rectangle's width
+                    for w2 in range(minimum_width, maximum_width - x - w1 + 1):
+                        # Loop all possible heights (they are the same)
+                        for h in range(minimum_height, maximum_height - y + 1):
+                            # Create the two rectangles
+                            rect1 = Rectangle(x, y, w1, h, pol)
+                            rect2 = Rectangle(x + w1, y, w2, h, -pol)
                             features.append(HaarFeature([rect1, rect2]))
 
     return features
