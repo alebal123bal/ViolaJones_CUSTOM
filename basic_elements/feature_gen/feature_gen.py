@@ -341,29 +341,22 @@ def generate_all_haar_features(
 if __name__ == "__main__":
     my_features = generate_all_haar_features(
         feature_types=[
-            "eye_like_horizontal",
+            "horizontal_2",
         ],
-        x_start=4,
-        y_start=2,
+        x_start=0,
+        y_start=0,
     )
+
+    import os
+    import numpy as np
+    from image_manager.image_loader.image_loader import load_image_as_array
 
     # Import a grayscale image for testing
-    import numpy as np
-
-    # Uncomment the line below to load the precomputed npy array of the 1st image
-    # image = np.load("basic_elements/feature_gen/test_image.npy")
-
-    from image_manager.image_loader.image_loader import (
-        load_images_from_folder,
-        FACE_PATH,
+    image = load_image_as_array(
+        os.path.join(os.getcwd(), "basic_elements", "feature_gen", "test_image.png")
     )
 
-    # Load all
-    face_images = load_images_from_folder(FACE_PATH)
-    # Use the nth image for testing
-    image = face_images[0]
-
-    for i, feat in enumerate(my_features[0:10]):
+    for i, feat in enumerate(my_features[0:20]):
 
         # Compute the integral image
         padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
