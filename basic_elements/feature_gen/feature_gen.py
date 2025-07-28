@@ -29,8 +29,8 @@ def generate_two_rectangle_horizontal(
     width, height = window_size
 
     # Define minimum width and height for rectangles
-    minimum_width = 1
-    minimum_height = 1
+    minimum_width = step
+    minimum_height = step
 
     # Define maximum width and height
     maximum_width = width - x_padding
@@ -46,15 +46,15 @@ def generate_two_rectangle_horizontal(
 
     for pol in (1, -1):
         # Loop all possible x
-        for x in range(minimum_x, maximum_x):
+        for x in range(minimum_x, maximum_x, step):
             # Loop all possible y
-            for y in range(minimum_y, maximum_y):
+            for y in range(minimum_y, maximum_y, step):
                 # Loop all possible widths
-                for w1 in range(minimum_width, maximum_width - x):
+                for w1 in range(minimum_width, maximum_width - x, step):
                     # Loop the other rectangle's width
-                    for w2 in range(minimum_width, maximum_width - x - w1 + 1):
+                    for w2 in range(minimum_width, maximum_width - x - w1 + 1, step):
                         # Loop all possible heights (they are the same)
-                        for h in range(minimum_height, maximum_height - y + 1):
+                        for h in range(minimum_height, maximum_height - y + 1, step):
                             # Create the two rectangles
                             rect1 = Rectangle(x, y, w1, h, pol)
                             rect2 = Rectangle(x + w1, y, w2, h, -pol)
@@ -288,8 +288,9 @@ def generate_eye_like_horizontal(
 def generate_all_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
-    x_start: int = 0,
-    y_start: int = 0,
+    x_padding: int = 0,
+    y_padding: int = 0,
+    step: int = 1,
 ) -> List[HaarFeature]:
     """
     Generate all Haar features for the given window size.
@@ -322,32 +323,36 @@ def generate_all_haar_features(
     )
 
     if "horizontal_2" in feature_types:
-        features = generate_two_rectangle_horizontal(window_size, x_start, y_start)
+        features = generate_two_rectangle_horizontal(
+            window_size, x_padding, y_padding, step
+        )
         all_features.extend(features)
         print(f"🔲 Generated {len(features)} two-rectangle horizontal features")
 
     if "vertical_2" in feature_types:
-        features = generate_two_rectangle_vertical(window_size, x_start, y_start)
+        features = generate_two_rectangle_vertical(window_size, x_padding, y_padding)
         all_features.extend(features)
         print(f"🔲 Generated {len(features)} two-rectangle vertical features")
 
     if "horizontal_3" in feature_types:
-        features = generate_three_rectangle_horizontal(window_size, x_start, y_start)
+        features = generate_three_rectangle_horizontal(
+            window_size, x_padding, y_padding
+        )
         all_features.extend(features)
         print(f"👁️ Generated {len(features)} three-rectangle horizontal features")
 
     if "vertical_3" in feature_types:
-        features = generate_three_rectangle_vertical(window_size, x_start, y_start)
+        features = generate_three_rectangle_vertical(window_size, x_padding, y_padding)
         all_features.extend(features)
         print(f"👁️ Generated {len(features)} three-rectangle vertical features")
 
     if "diagonal_4" in feature_types:
-        features = generate_four_rectangle_diagonal(window_size, x_start, y_start)
+        features = generate_four_rectangle_diagonal(window_size, x_padding, y_padding)
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} four-rectangle diagonal features")
 
     if "eye_like_horizontal" in feature_types:
-        features = generate_eye_like_horizontal(window_size, x_start, y_start)
+        features = generate_eye_like_horizontal(window_size, x_padding, y_padding)
         all_features.extend(features)
         print(f"👁️ Generated {len(features)} eye-like horizontal features")
 
@@ -361,12 +366,12 @@ if __name__ == "__main__":
         feature_types=[
             "horizontal_2",
         ],
-        x_start=0,
-        y_start=0,
+        x_padding=6,
+        y_padding=6,
+        step=2,
     )
 
     import os
-    import numpy as np
     from image_manager.image_loader.image_loader import load_image_as_array
 
     # Import a grayscale image for testing
@@ -374,16 +379,6 @@ if __name__ == "__main__":
         os.path.join(os.getcwd(), "basic_elements", "feature_gen", "test_image.png")
     )
 
-    for i, feat in enumerate(my_features[0:20]):
-
-        # Compute the integral image
-        padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
-        intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
-
-        # Evaluate the feature with the window at position (0, 0)
-        feat_val = feat.evaluate(intgr_image, shift_x=0, shift_y=0)
-
-        print(f"Feature {i} value at (0, 0): {feat_val}")
-
+    for i, feat in enumerate(my_features[0:]):
         # Plot the feature
         feat.plot(grayscale_image=image)
