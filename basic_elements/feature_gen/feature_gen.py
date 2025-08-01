@@ -410,10 +410,10 @@ def generate_all_haar_features(
 if __name__ == "__main__":
     my_features = generate_all_haar_features(
         feature_types=[
-            # "horizontal_2",
-            # "vertical_2",
-            # "horizontal_3",
-            # "vertical_3",
+            "horizontal_2",
+            "vertical_2",
+            "horizontal_3",
+            "vertical_3",
             "diagonal_4",
         ],
         x_padding=2,
