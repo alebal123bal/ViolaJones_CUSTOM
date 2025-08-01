@@ -121,16 +121,18 @@ def generate_two_rectangle_vertical(
 
 def generate_three_rectangle_horizontal(
     window_size: Tuple[int, int] = (22, 22),
-    x_start: int = 0,
-    y_start: int = 0,
+    x_padding: int = 0,
+    y_padding: int = 0,
+    step: int = 1,
 ) -> List[HaarFeature]:
     """
-    Generate three-rectangle horizontal features (left-center-right pattern).
+    Generate all possible three-rectangle horizontal features (left-center-right pattern).
+    Hardcoded for 22x22 window size.
 
     Args:
-        window_size: Tuple of (width, height) for the detection window
-        x_start: Starting x coordinate for feature generation
-        y_start: Starting y coordinate for feature generation
+        x_padding: Padding on the x-axis
+        y_padding: Padding on the y-axis
+        step: Step size for iteration
 
     Returns:
         List of HaarFeature objects
@@ -138,21 +140,50 @@ def generate_three_rectangle_horizontal(
     features = []
     width, height = window_size
 
+    # Define minimum width and height for rectangles
+    minimum_width = step
+    minimum_height = step
+
+    # Define maximum width and height
+    maximum_width = width - x_padding
+    maximum_height = height - y_padding
+
+    # Define minimum x and y coordinates
+    minimum_x = x_padding
+    minimum_y = y_padding
+
+    # Define maximum x and y coordinates
+    maximum_x = width - x_padding - 2  # -2 to ensure minimum total width of 3
+    maximum_y = height - y_padding
+
     for pol in (1, -1):
-        for y in range(y_start, height - y_start - 1):
-            for x in range(
-                x_start, width - x_start - 2
-            ):  # -2 to ensure minimum width of 3
-                for h in range(2, height - y + 1):
-                    for w in range(3, width - x, 3):  # Widths divisible by 3, step by 3
-                        if x + w <= width:
-                            rect_width = w // 3
-                            rect1 = Rectangle(x, y, rect_width, h, pol)
-                            rect2 = Rectangle(x + rect_width, y, rect_width, h, -pol)
-                            rect3 = Rectangle(
-                                x + 2 * rect_width, y, rect_width, h, +pol
-                            )
-                            features.append(HaarFeature([rect1, rect2, rect3]))
+        # Loop all possible x
+        for x in range(minimum_x, maximum_x, step):
+            # Loop all possible y
+            for y in range(minimum_y, maximum_y, step):
+                # Loop all possible widths for first rectangle
+                for w1 in range(
+                    minimum_width, maximum_width - x - 2 + 1, step
+                ):  # -2 for other two rectangles
+                    # Loop all possible widths for second rectangle
+                    for w2 in range(
+                        minimum_width, maximum_width - x - w1 - 1 + 1, step
+                    ):  # -1 for third rectangle
+                        # Loop all possible widths for third rectangle
+                        for w3 in range(
+                            minimum_width, maximum_width - x - w1 - w2 + 1, step
+                        ):
+                            # Loop all possible heights (they are the same for all three)
+                            for h in range(
+                                minimum_height, maximum_height - y + 1, step
+                            ):
+                                # Check if the three rectangles fit within the window
+                                if x + w1 + w2 + w3 <= width:
+                                    # Create the three rectangles
+                                    rect1 = Rectangle(x, y, w1, h, pol)
+                                    rect2 = Rectangle(x + w1, y, w2, h, -pol)
+                                    rect3 = Rectangle(x + w1 + w2, y, w3, h, pol)
+                                    features.append(HaarFeature([rect1, rect2, rect3]))
 
     return features
 
@@ -247,67 +278,6 @@ def generate_four_rectangle_diagonal(
     return features
 
 
-def generate_eye_like_horizontal(
-    window_size: Tuple[int, int] = (22, 22),
-    x_start: int = 0,
-    y_start: int = 0,
-) -> List[HaarFeature]:
-    """
-    Generate eye-like horizontal features (dark-light-dark pattern).
-    Eye regions are 1 pixel wider than the nose region.
-    Useful for detecting eye regions with bright areas between dark eyebrows/eyes.
-
-    Args:
-        window_size: Tuple of (width, height) for the detection window
-        x_start: Starting x coordinate for feature generation
-        y_start: Starting y coordinate for feature generation
-
-    Returns:
-        List of HaarFeature objects
-    """
-    features = []
-    width, height = window_size
-
-    for pol in (1, -1):
-        for y in range(y_start, height - y_start - 1):
-            for x in range(
-                x_start, width - x_start - 4
-            ):  # Need at least 5 pixels total
-                for h in range(2, height - y + 1):
-                    # Start with minimum 5 pixels, step by 1 (not 3)
-                    for w in range(5, width - x + 1):
-                        if x + w <= width:
-                            # Calculate widths: eye + nose + eye = w
-                            # If nose = n, then eyes = n + 1
-                            # So: (n+1) + n + (n+1) = w
-                            # 3n + 2 = w
-                            # n = (w - 2) / 3
-
-                            if (w - 2) % 3 == 0:  # Only when we can divide evenly
-                                nose_width = (w - 2) // 3
-                                eye_width = nose_width + 1
-
-                                if (
-                                    nose_width >= 1 and eye_width >= 2
-                                ):  # Ensure minimum sizes
-                                    rect1 = Rectangle(
-                                        x, y, eye_width, h, -pol
-                                    )  # Left eye (dark)
-                                    rect2 = Rectangle(
-                                        x + eye_width, y, nose_width, h, pol
-                                    )  # Nose (light)
-                                    rect3 = Rectangle(
-                                        x + eye_width + nose_width,
-                                        y,
-                                        eye_width,
-                                        h,
-                                        -pol,
-                                    )  # Right eye (dark)
-                                    features.append(HaarFeature([rect1, rect2, rect3]))
-
-    return features
-
-
 def generate_all_haar_features(
     window_size: Tuple[int, int] = (22, 22),
     feature_types: List[str] = None,
@@ -336,7 +306,6 @@ def generate_all_haar_features(
             "horizontal_3",
             "vertical_3",
             "diagonal_4",
-            "eye_like_horizontal",
         ]
 
     all_features = []
@@ -361,7 +330,7 @@ def generate_all_haar_features(
 
     if "horizontal_3" in feature_types:
         features = generate_three_rectangle_horizontal(
-            window_size, x_padding, y_padding
+            window_size, x_padding, y_padding, step
         )
         all_features.extend(features)
         print(f"👁️ Generated {len(features)} three-rectangle horizontal features")
@@ -376,11 +345,6 @@ def generate_all_haar_features(
         all_features.extend(features)
         print(f"🎭 Generated {len(features)} four-rectangle diagonal features")
 
-    if "eye_like_horizontal" in feature_types:
-        features = generate_eye_like_horizontal(window_size, x_padding, y_padding)
-        all_features.extend(features)
-        print(f"👁️ Generated {len(features)} eye-like horizontal features")
-
     print(f"📊 Total features generated: {len(all_features)}\n")
     return all_features
 
@@ -390,11 +354,12 @@ if __name__ == "__main__":
     my_features = generate_all_haar_features(
         feature_types=[
             # "horizontal_2",
-            "vertical_2",
+            # "vertical_2",
+            "horizontal_3",
         ],
-        x_padding=6,
-        y_padding=6,
-        step=2,
+        x_padding=0,
+        y_padding=0,
+        step=3,
     )
 
     import os
