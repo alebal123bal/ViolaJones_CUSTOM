@@ -50,17 +50,17 @@
             "stopOnEntry": false
         },
         {
-            "name": "Debug Data Preprocess",
+            "name": "Debug Nonface Creator",
             "type": "debugpy",
             "request": "launch",
-            "module": "image_manager.data_preprocess.data_preprocess",
+            "module": "image_manager.dataset_creator.nonface_dataset_creator",
             "console": "integratedTerminal"
         },
         {
-            "name": "Run Data Preprocess",
+            "name": "Run Nonface Creator",
             "type": "debugpy",
             "request": "launch",
-            "module": "image_manager.data_preprocess.data_preprocess",
+            "module": "image_manager.dataset_creator.nonface_dataset_creator",
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false
