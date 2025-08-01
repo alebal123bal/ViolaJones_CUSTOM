@@ -190,16 +190,18 @@ def generate_three_rectangle_horizontal(
 
 def generate_three_rectangle_vertical(
     window_size: Tuple[int, int] = (22, 22),
-    x_start: int = 0,
-    y_start: int = 0,
+    x_padding: int = 0,
+    y_padding: int = 0,
+    step: int = 1,
 ) -> List[HaarFeature]:
     """
-    Generate three-rectangle vertical features (top-center-bottom pattern).
+    Generate all possible three-rectangle vertical features (top-center-bottom pattern).
+    Hardcoded for 22x22 window size.
 
     Args:
-        window_size: Tuple of (width, height) for the detection window
-        x_start: Starting x coordinate for feature generation
-        y_start: Starting y coordinate for feature generation
+        x_padding: Padding on the x-axis
+        y_padding: Padding on the y-axis
+        step: Step size for iteration
 
     Returns:
         List of HaarFeature objects
@@ -207,23 +209,48 @@ def generate_three_rectangle_vertical(
     features = []
     width, height = window_size
 
+    # Define minimum width and height for rectangles
+    minimum_width = step
+    minimum_height = step
+
+    # Define maximum width and height
+    maximum_width = width - x_padding
+    maximum_height = height - y_padding
+
+    # Define minimum x and y coordinates
+    minimum_x = x_padding
+    minimum_y = y_padding
+
+    # Define maximum x and y coordinates
+    maximum_x = width - x_padding
+    maximum_y = height - y_padding - 2  # -2 to ensure minimum total height of 3
+
     for pol in (1, -1):
-        for y in range(
-            y_start, height - y_start - 2
-        ):  # -2 to ensure minimum height of 3
-            for x in range(x_start, width - x_start - 1):
-                for w in range(2, width - x + 1):
-                    for h in range(
-                        3, height - y, 3
-                    ):  # Heights divisible by 3, step by 3
-                        if y + h <= height:
-                            rect_height = h // 3
-                            rect1 = Rectangle(x, y, w, rect_height, pol)
-                            rect2 = Rectangle(x, y + rect_height, w, rect_height, -pol)
-                            rect3 = Rectangle(
-                                x, y + 2 * rect_height, w, rect_height, pol
-                            )
-                            features.append(HaarFeature([rect1, rect2, rect3]))
+        # Loop all possible x
+        for x in range(minimum_x, maximum_x, step):
+            # Loop all possible y
+            for y in range(minimum_y, maximum_y, step):
+                # Loop all possible heights for first rectangle
+                for h1 in range(
+                    minimum_height, maximum_height - y - 2 + 1, step
+                ):  # -2 for other two rectangles
+                    # Loop all possible heights for second rectangle
+                    for h2 in range(
+                        minimum_height, maximum_height - y - h1 - 1 + 1, step
+                    ):  # -1 for third rectangle
+                        # Loop all possible heights for third rectangle
+                        for h3 in range(
+                            minimum_height, maximum_height - y - h1 - h2 + 1, step
+                        ):
+                            # Loop all possible widths (they are the same for all three)
+                            for w in range(minimum_width, maximum_width - x + 1, step):
+                                # Check if the three rectangles fit within the window
+                                if y + h1 + h2 + h3 <= height:
+                                    # Create the three rectangles
+                                    rect1 = Rectangle(x, y, w, h1, pol)
+                                    rect2 = Rectangle(x, y + h1, w, h2, -pol)
+                                    rect3 = Rectangle(x, y + h1 + h2, w, h3, pol)
+                                    features.append(HaarFeature([rect1, rect2, rect3]))
 
     return features
 
@@ -336,7 +363,9 @@ def generate_all_haar_features(
         print(f"👁️ Generated {len(features)} three-rectangle horizontal features")
 
     if "vertical_3" in feature_types:
-        features = generate_three_rectangle_vertical(window_size, x_padding, y_padding)
+        features = generate_three_rectangle_vertical(
+            window_size, x_padding, y_padding, step
+        )
         all_features.extend(features)
         print(f"👁️ Generated {len(features)} three-rectangle vertical features")
 
@@ -355,10 +384,11 @@ if __name__ == "__main__":
         feature_types=[
             # "horizontal_2",
             # "vertical_2",
-            "horizontal_3",
+            # "horizontal_3",
+            "vertical_3",
         ],
-        x_padding=0,
-        y_padding=0,
+        x_padding=2,
+        y_padding=2,
         step=3,
     )
 
