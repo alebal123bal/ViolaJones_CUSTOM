@@ -3,9 +3,11 @@ Train a Viola-Jones face detection model using the optimized AdaBoost.
 """
 
 import time
+
 from matrix_creator.feature_eval_matrix_maker import (
     create_matrix_weights_labels,
     generate_all_haar_features,
+    # generate_all_full_coverage_haar_features,
     load_images_from_folder,
     compute_integral_images,
     load_matrix_weights_labels,
@@ -22,19 +24,45 @@ from AdaBoost_smart.adaboost import (
 if __name__ == "__main__":
     start_time = time.time()
 
-    # Load Haar features eliminating the corner features
-    haar_features = generate_all_haar_features(
+    # Generate Haar features
+    haar_features_0 = generate_all_haar_features(
+        feature_types=[
+            "horizontal_2",
+            "vertical_2",
+            "diagonal_4",
+        ],
+        x_padding=1,
+        y_padding=1,
+        step=5,
+    )
+
+    haar_features_1 = generate_all_haar_features(
         feature_types=[
             "horizontal_2",
             "vertical_2",
             "horizontal_3",
             "vertical_3",
-            "eye_like_horizontal",
-            "nose_bridge",
+            # "diagonal_4",
         ],
-        x_start=4,
-        y_start=2,
+        x_padding=2,
+        y_padding=2,
+        step=3,
     )
+
+    haar_features_2 = generate_all_haar_features(
+        feature_types=[
+            "horizontal_2",
+            "vertical_2",
+            "horizontal_3",
+            "vertical_3",
+            # "diagonal_4",
+        ],
+        x_padding=5,
+        y_padding=5,
+        step=2,
+    )
+
+    haar_features = haar_features_0 + haar_features_1 + haar_features_2
 
     # Load face images from the dataset folder and limit to a images
     face_images = load_images_from_folder(FACE_PATH)
@@ -60,9 +88,9 @@ if __name__ == "__main__":
         feature_eval_matrix=feature_matrix,
         sample_weights=weights,
         sample_labels=labels,
-        n_stages=3,
+        n_stages=8,
         aggressivness=0.4,
-        feature_per_stage=4,
+        feature_per_stage=3,
     )
 
     # Train the classifier
