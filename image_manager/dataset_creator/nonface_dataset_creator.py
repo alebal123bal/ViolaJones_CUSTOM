@@ -1374,7 +1374,55 @@ def create_multi_face_fragments():
     return count
 
 
+def create_all_nonface_negatives():
+    """
+    Calls all negative sample generators in sequence.
+    Does not collect or print per-category counts, only progress messages.
+    """
+    print("=== STARTING FULL NEGATIVE SET GENERATION ===\n")
+
+    print("[1/12] Adding random noise images...")
+    add_random_images(1000)
+
+    print("[2/12] Creating face-like objects...")
+    create_face_like_objects()
+
+    print("[3/12] Creating partial face fragments...")
+    create_partial_face_fragments()
+
+    print("[4/12] Creating natural non-face patterns...")
+    create_natural_non_face_patterns()
+
+    print("[5/12] Creating geometric shapes...")
+    create_geometric_shapes()
+
+    print("[6/12] Creating random noise patterns...")
+    create_random_noise_patterns()
+
+    print("[7/12] Creating monochromatic negatives...")
+    create_monochromatic_negatives()
+
+    print("[8/12] Creating extended monochromatic negatives...")
+    create_extended_monochromatic_negatives()
+
+    print("[9/12] Creating quick monochromatic negatives...")
+    create_quick_monochromatic_negatives()
+
+    print("[10/12] Creating shifted positive samples as negatives...")
+    create_shifted_positive_samples()
+
+    print("[11/12] Creating partial shifted faces...")
+    create_partial_shifted_faces()
+
+    print("[12/12] Creating multi-face fragments...")
+    create_multi_face_fragments()
+
+    print("\n=== NEGATIVE SET GENERATION COMPLETE ===")
+    print("All negative sample generators have finished.\n")
+    print("========================================")
+
+
 if __name__ == "__main__":
     print("Starting negative sample generation...")
+    # create_all_nonface_negatives()
     print("Done!")
-    pass
