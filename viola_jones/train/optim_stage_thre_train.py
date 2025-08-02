@@ -36,7 +36,7 @@ def cascade_prediction(
 
     voted_sum_arr = []
 
-    for s_idx, stage in enumerate(classifier):
+    for stage in classifier:
         voted_sum = 0.0
         stage_features = stage["stage_features"]
         for feature_dict in stage_features:
@@ -64,7 +64,8 @@ def cascade_prediction(
         # Append the voted sum for this stage
         voted_sum_arr.append(voted_sum)
 
-        # If the sum of votes is positive, classify as a face
+        # Assume a majority voting, so a zero threshold, as the AdaBoost
+        # module is trained with a zero threshold.
         if voted_sum < 0.0:
             # Quick rejection of this stage
             return False, None
@@ -72,23 +73,33 @@ def cascade_prediction(
     return True, voted_sum_arr
 
 
-if __name__ == "__main__":
+def enrich_classifier(
+    face_images=None,
+    classifier=None,
+    std_devs=1.5,
+):
+    """
+    Enrich the classifier with the optimal stage thresholds.
+    """
+    print("\nEnriching classifier with optimal stage thresholds...")
 
-    # Load face images
-    face_images = load_images_from_folder(FACE_PATH)
+    # Load face images if not provided
+    if face_images is None:
+        face_images = load_images_from_folder(FACE_PATH)
 
     # Compute integral images for face images
     integral_images = compute_integral_images(face_images)
 
-    # Load the classifier
-    my_classifier = load_pickle_obj("_pickle_folder/full_trained_classifier.pkl")
+    # Load the classifier if not provided
+    if classifier is None:
+        # Load the trained classifier from a pickle file
+        classifier = load_pickle_obj("_pickle_folder/full_trained_classifier.pkl")
 
-    # Create a [n_faces, 8] array to store the prediction values
     predictions = []
     for grayscale_image, integral_image in zip(face_images, integral_images):
         # Perform cascade prediction
         is_face, voted_sum_arr = cascade_prediction(
-            classifier=my_classifier,
+            classifier=classifier,
             grayscale_image=grayscale_image,
             integral_image=integral_image,
         )
@@ -101,19 +112,19 @@ if __name__ == "__main__":
     means = np.mean(predictions, axis=0)
     stds = np.std(predictions, axis=0)
 
-    optim_stage_thre = means - 1.5 * stds
+    optim_stage_thre = means - std_devs * stds
 
     print(f"Optimal stage thresholds: {optim_stage_thre}")
 
-    # Check
-    good_pred = np.all(predictions > optim_stage_thre, axis=1)
-    print(f"Good predictions: {np.sum(good_pred)} out of {len(good_pred)}")
-
     # Append them to the classifier
-    for stage_idx, stage in enumerate(my_classifier):
+    for stage_idx, stage in enumerate(classifier):
         stage["stage_thre"] = optim_stage_thre[stage_idx]
 
-    # Save the updated classifier
-    save_pickle_obj(my_classifier, "full_trained_classifier.pkl")
+    print("Classifier enriched with optimal stage thresholds.\n")
 
-    print("Finish")
+    # Save the updated classifier
+    save_pickle_obj(classifier, "full_trained_classifier.pkl")
+
+
+if __name__ == "__main__":
+    enrich_classifier()

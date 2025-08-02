@@ -20,6 +20,7 @@ from AdaBoost_smart.adaboost import (
     save_pickle_obj,
     load_pickle_obj,
 )
+from viola_jones.train.optim_stage_thre_train import enrich_classifier
 
 if __name__ == "__main__":
     start_time = time.time()
@@ -134,6 +135,13 @@ if __name__ == "__main__":
     save_pickle_obj(
         my_classifier,
         "full_trained_classifier.pkl",
+    )
+
+    # Enrich the classifier with stage thresholds
+    enrich_classifier(
+        face_images=face_images,
+        classifier=my_classifier,
+        std_devs=1.5,
     )
 
     # Visualize the best features
