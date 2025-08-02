@@ -38,7 +38,8 @@ def cascade_prediction(
 
     for s_idx, stage in enumerate(classifier):
         voted_sum = 0.0
-        for feature_dict in stage:
+        stage_features = stage["stage_features"]
+        for feature_dict in stage_features:
             # Extract feature
             feature = feature_dict["feature"]
 
@@ -107,5 +108,12 @@ if __name__ == "__main__":
     # Check
     good_pred = np.all(predictions > optim_stage_thre, axis=1)
     print(f"Good predictions: {np.sum(good_pred)} out of {len(good_pred)}")
+
+    # Append them to the classifier
+    for stage_idx, stage in enumerate(my_classifier):
+        stage["stage_thre"] = optim_stage_thre[stage_idx]
+
+    # Save the updated classifier
+    save_pickle_obj(my_classifier, "full_trained_classifier.pkl")
 
     print("Finish")

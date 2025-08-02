@@ -88,7 +88,7 @@ if __name__ == "__main__":
         feature_eval_matrix=feature_matrix,
         sample_weights=weights,
         sample_labels=labels,
-        n_stages=8,
+        n_stages=5,
         aggressivness=0.4,
         feature_per_stage=3,
     )
@@ -129,7 +129,7 @@ if __name__ == "__main__":
                     "feature": feature,
                 }
             )
-        my_classifier.append(stage_haar_features)
+        my_classifier.append({"stage_thre": 0.0, "stage_features": stage_haar_features})
 
     save_pickle_obj(
         my_classifier,
@@ -138,6 +138,7 @@ if __name__ == "__main__":
 
     # Visualize the best features
     for stage in load_pickle_obj("_pickle_folder/full_trained_classifier.pkl"):
-        for feature_dict in stage:
+        stage_features = stage["stage_features"]
+        for feature_dict in stage_features:
             feature = feature_dict["feature"]
             feature.plot(grayscale_image=face_images[1])
