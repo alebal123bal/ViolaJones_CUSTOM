@@ -810,11 +810,12 @@ if __name__ == "__main__":
 
     my_features = generate_all_full_coverage_haar_features(
         feature_types=[
-            # "horizontal_2_full",
+            "horizontal_2_full",
             # "vertical_2_full",
             # "horizontal_3_full",
             # "vertical_3_full",
-            # "horizontal_4_full" "vertical_4_full",
+            # "horizontal_4_full",
+            # "vertical_4_full",
             # "grid_4_full",
             # "horizontal_5_full",
             # "vertical_5_full",
@@ -826,7 +827,7 @@ if __name__ == "__main__":
             # "grid_8_vertical_full",
             # "grid_9_full",
             # "grid_12_horizontal_full",
-            "grid_12_vertical_full",
+            # "grid_12_vertical_full",
         ],
         window_size=(22, 22),
         step=2,
@@ -837,7 +838,7 @@ if __name__ == "__main__":
         os.path.join(os.getcwd(), "basic_elements", "feature_gen", "test_image.png")
     )
 
-    for i, feat in enumerate(my_features[-10:-1]):
+    for i, feat in enumerate(my_features[0:]):
         # Compute the integral image
         padded = np.pad(image, ((1, 0), (1, 0)), mode="constant", constant_values=0)
         intgr_image = np.cumsum(np.cumsum(padded.astype(np.int32), axis=0), axis=1)
