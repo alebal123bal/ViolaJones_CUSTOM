@@ -7,7 +7,13 @@ import time
 
 import numpy as np
 
-from basic_elements.feature_gen.feature_gen import generate_all_haar_features
+# pylint: disable=unused-import
+from basic_elements.feature_gen.feature_gen import (
+    generate_all_haar_features,
+)
+from basic_elements.feature_gen.feature_gen_full import (
+    generate_all_full_coverage_haar_features,
+)
 from image_manager.image_loader.image_loader import (
     load_images_from_folder,
     compute_integral_images,
@@ -115,8 +121,8 @@ def get_matrix_weights_labels(
 
     # Create weights array
     weights = np.ones(
-        total_samples, dtype=np.float32
-    )  # Float32 for numba compatibility
+        total_samples, dtype=np.float64
+    )  # Float64 for numba compatibility and precision
 
     # Assign weights inversely proportional to class size
     weights[:num_faces] = 5.0 / num_faces  # Face weights
@@ -376,6 +382,7 @@ def create_matrix_weights_labels(
     # Analyze the matrix to determine if clipping is safe
     # do_clipping = _analyze_matrix(matrix=mat)
     do_clipping = True
+    do_clipping = False
 
     # If clipping is safe, clip the matrix
     if do_clipping:
