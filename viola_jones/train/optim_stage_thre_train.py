@@ -2,7 +2,7 @@
 Find best stage thresholds for cascade prediction using a trained classifier.
 """
 
-# pylint: disable=unused-import, unused-argument, too-many-locals, too-many-statements
+# pylint: disable=unused-import, unused-argument,unused-variable, too-many-locals, too-many-statements
 
 import numpy as np
 
