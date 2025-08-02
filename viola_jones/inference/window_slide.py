@@ -32,6 +32,9 @@ FACE_PATH = "image_manager/training_set/face"
 NOT_FACE_PATH = "image_manager/training_set/not_face"
 
 
+STEP = 1
+
+
 def visualize_detections(image, detections):
     """Visualize the final detections on the image."""
 
@@ -139,13 +142,14 @@ def window_slide(image_path: str, classifier_path: str):
     # Preallocate a list to store the coordinates of detected faces
     detected_faces = []
 
-    step = 2
-
     for scale in [
-        1.0,
+        # 1.0,
         # 2.0,
         # 4.0,
         # 5.0,
+        # 6.0,
+        6.8,
+        # 7.0,
         # 8.0,
         # 9.0,
         # 10.0,
@@ -153,8 +157,10 @@ def window_slide(image_path: str, classifier_path: str):
         all_voted_sums = []
 
         # Perform window sliding to detect faces
-        for y in range(0, test_image.shape[0] - int(22 * scale) + 1, step):
-            for x in range(0, test_image.shape[1] - int(22 * scale) + 1, step):
+        for y in range(0, test_image.shape[0] - int(22 * scale) + 1, int(STEP * scale)):
+            for x in range(
+                0, test_image.shape[1] - int(22 * scale) + 1, int(STEP * scale)
+            ):
                 # Extract the scaled window from the image
                 window = test_image[y : y + int(22 * scale), x : x + int(22 * scale)]
 
@@ -211,7 +217,7 @@ def non_maximum_suppression(detected_faces):
     """
 
     min_distance = (
-        3  # Minimum distance between two detections to consider them separate
+        STEP * 7  # Minimum distance between two detections to consider them separate
     )
 
     # First check for the isolated faces and discard them, as they are false positives
@@ -219,7 +225,7 @@ def non_maximum_suppression(detected_faces):
         x1, y1, size1 = detected_faces[i]
         isolated = True
 
-        for (j,) in enumerate(detected_faces):
+        for j, _ in enumerate(detected_faces):
             if i == j:
                 continue
             x2, y2, _ = detected_faces[j]
