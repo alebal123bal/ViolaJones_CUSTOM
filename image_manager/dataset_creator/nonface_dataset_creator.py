@@ -2,6 +2,8 @@
 Create nonface dataset.
 """
 
+# pylint: disable=all
+
 import os
 import numpy as np
 from PIL import Image
