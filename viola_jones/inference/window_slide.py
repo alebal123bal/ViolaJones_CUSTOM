@@ -3,6 +3,8 @@ Load the test image from the specified path, perform window sliding to detect fa
  the trained classifier, and visualize the results.
 """
 
+# pylint: disable=unused-argument
+
 import os
 
 import numpy as np
@@ -72,7 +74,7 @@ def cascade_prediction(
 
     voted_sum_arr = []
 
-    for s_idx, stage in enumerate(classifier):
+    for _, stage in enumerate(classifier):
         voted_sum = 0.0
         stage_features = stage["stage_features"]
         for feature_dict in stage_features:
@@ -186,18 +188,6 @@ def window_slide(image_path: str, classifier_path: str):
 
     print("Window sliding completed.")
 
-    # Filter where the voted sums are not None
-    all_voted_sums = [
-        elem for elem in all_voted_sums if elem["voted_sum_arr"] is not None
-    ]
-
-    # Discard those voted sums where the first 3 elements are not all >=1
-    good_pred = [
-        elem
-        for elem in all_voted_sums
-        if np.all(np.array(elem["voted_sum_arr"][0:3]) >= 1.9)
-    ]
-
     print("Performing non maximum suppression...")
 
     # Perform non-maximum suppression on the detected faces
@@ -215,11 +205,12 @@ def non_maximum_suppression(detected_faces):
     Basically check the top left corner, and if the distance between two
     detections is less than 2 pixels, keep it and remove the other one.
     At the moment every detection window is fixed at 22x22 pixels.
-    The detected_faces is a list of tuples (x, y) indicating the top left corner of the detection window.
+    The detected_faces is a list of tuples (x, y) indicating the top left corner
+    of the detection window.
     If the detected is alone, discard it as most likely it is a false positive.
     """
 
-    MIN_DISTANCE = (
+    min_distance = (
         3  # Minimum distance between two detections to consider them separate
     )
 
@@ -228,13 +219,13 @@ def non_maximum_suppression(detected_faces):
         x1, y1, size1 = detected_faces[i]
         isolated = True
 
-        for j in range(len(detected_faces)):
+        for (j,) in enumerate(detected_faces):
             if i == j:
                 continue
-            x2, y2, size2 = detected_faces[j]
+            x2, y2, _ = detected_faces[j]
 
             # Check if the distance between the two detections is less than 2 pixels
-            if abs(x1 - x2) < MIN_DISTANCE and abs(y1 - y2) < MIN_DISTANCE:
+            if abs(x1 - x2) < min_distance and abs(y1 - y2) < min_distance:
                 isolated = False
                 break
 
@@ -248,15 +239,15 @@ def non_maximum_suppression(detected_faces):
     final_detections = []
 
     # Iterate through the detected faces and apply non-maximum suppression
-    for i in range(len(detected_faces)):
+    for i, _ in enumerate(detected_faces):
         x1, y1, size1 = detected_faces[i]
         keep = True
 
         for j in range(i + 1, len(detected_faces)):
-            x2, y2, size2 = detected_faces[j]
+            x2, y2, _ = detected_faces[j]
 
             # Check if the distance between the two detections is less than 2 pixels
-            if abs(x1 - x2) < MIN_DISTANCE and abs(y1 - y2) < MIN_DISTANCE:
+            if abs(x1 - x2) < min_distance and abs(y1 - y2) < min_distance:
                 keep = False
                 break
 
