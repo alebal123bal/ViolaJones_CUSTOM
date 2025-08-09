@@ -718,7 +718,7 @@ def create_monochromatic_negatives():
                     )
                     for i, (y_slice, x_slice) in enumerate(regions):
                         region_intensity = base_intensity + i * contrast_level
-                        block_image[y_slice, x_slice] = region_intensity
+                        block_image[y_slice, x_slice] = min(region_intensity, 255)
 
                 image_name = f"mono_blocks_{block_name}_contrast{contrast_level:03d}_var{variation}.png"
                 image_path = os.path.join(not_face_path, image_name)
@@ -1426,5 +1426,5 @@ def create_all_nonface_negatives():
 
 if __name__ == "__main__":
     print("Starting negative sample generation...")
-    # create_all_nonface_negatives()
+    create_all_nonface_negatives()
     print("Done!")
