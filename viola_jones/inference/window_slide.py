@@ -14,6 +14,8 @@ import matplotlib.patches as patches
 from image_manager.image_loader.image_loader import (
     load_image_as_array,
     compute_integral_image,
+    FACE_PATH,
+    NOT_FACE_PATH,
 )
 
 from AdaBoost_smart.adaboost import load_pickle_obj
@@ -26,10 +28,6 @@ IMAGE_PATH = "viola_jones/inference/test_image/medium.png"
 IMAGE_PATH = "viola_jones/inference/test_image/hard.jpg"
 # IMAGE_PATH = "viola_jones/inference/test_image/very_hard.jpg"
 CLASSIFIER_PATH = "_pickle_folder/full_trained_classifier.pkl"
-
-# Training sets
-FACE_PATH = "image_manager/training_set/face"
-NOT_FACE_PATH = "image_manager/training_set/not_face"
 
 
 STEP = 1

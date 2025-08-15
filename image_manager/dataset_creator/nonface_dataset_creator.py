@@ -7,10 +7,11 @@ Create nonface dataset.
 import os
 import numpy as np
 from PIL import Image
-from image_manager.image_loader.image_loader import load_images_from_folder
-
-FACE_PATH = "image_manager/training_set/face"
-NOT_FACE_PATH = "image_manager/training_set/not_face"
+from image_manager.image_loader.image_loader import (
+    load_images_from_folder,
+    FACE_PATH,
+    NOT_FACE_PATH,
+)
 
 
 def add_random_images(n_images=1000):
