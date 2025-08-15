@@ -14,12 +14,10 @@ from matrix_creator.feature_eval_matrix_maker import (
     FACE_PATH,
     NOT_FACE_PATH,
 )
-from AdaBoost_smart.adaboost import (
-    AdaBoost,
-    ClassifierScoreCheck,
-    save_pickle_obj,
-    load_pickle_obj,
-)
+
+from AdaBoost_smart.classifiers.adaboost_trainer import AdaBoostTrainer
+from AdaBoost_smart.classifiers.classifier_score_check import ClassifierScoreCheck
+from AdaBoost_smart.utils.io_operations import PickleUtils
 from viola_jones.train.optim_stage_thre_train import enrich_classifier
 
 if __name__ == "__main__":
@@ -85,7 +83,7 @@ if __name__ == "__main__":
     feature_matrix, weights, labels = load_matrix_weights_labels()
 
     # Create an AdaBoost classifier with the loaded feature matrix
-    adaboost_classifier = AdaBoost(
+    adaboost_classifier = AdaBoostTrainer(
         feature_eval_matrix=feature_matrix,
         sample_weights=weights,
         sample_labels=labels,
@@ -113,7 +111,8 @@ if __name__ == "__main__":
     # Save the trained classifier with the feature objects too
     my_classifier = []
 
-    for stage in load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
+    # TODO: move this inside the optim_stage_thre_train and rename that module into classifier_utils
+    for stage in PickleUtils.load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
         stage_haar_features = []
         for feature_dict in stage:
             # Retrieve the Haar feature object using the index
@@ -132,7 +131,7 @@ if __name__ == "__main__":
             )
         my_classifier.append({"stage_thre": 0.0, "stage_features": stage_haar_features})
 
-    save_pickle_obj(
+    PickleUtils.save_pickle_obj(
         my_classifier,
         "full_trained_classifier.pkl",
     )
@@ -145,7 +144,9 @@ if __name__ == "__main__":
     )
 
     # Visualize the best features
-    for stage in load_pickle_obj("_pickle_folder/full_trained_classifier.pkl"):
+    for stage in PickleUtils.load_pickle_obj(
+        "_pickle_folder/full_trained_classifier.pkl"
+    ):
         stage_features = stage["stage_features"]
         for feature_dict in stage_features:
             feature = feature_dict["feature"]

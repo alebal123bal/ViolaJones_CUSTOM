@@ -17,12 +17,9 @@ from matrix_creator.feature_eval_matrix_maker import (
     NOT_FACE_PATH,
 )
 
-from AdaBoost_smart.adaboost import (
-    AdaBoost,
-    ClassifierScoreCheck,
-    save_pickle_obj,
-    load_pickle_obj,
-)
+from AdaBoost_smart.classifiers.adaboost_trainer import AdaBoostTrainer
+from AdaBoost_smart.classifiers.classifier_score_check import ClassifierScoreCheck
+from AdaBoost_smart.utils.io_operations import PickleUtils
 
 
 def cascade_prediction(
@@ -93,7 +90,9 @@ def enrich_classifier(
     # Load the classifier if not provided
     if classifier is None:
         # Load the trained classifier from a pickle file
-        classifier = load_pickle_obj("_pickle_folder/full_trained_classifier.pkl")
+        classifier = PickleUtils.load_pickle_obj(
+            "_pickle_folder/full_trained_classifier.pkl"
+        )
 
     predictions = []
     for grayscale_image, integral_image in zip(face_images, integral_images):
@@ -123,7 +122,7 @@ def enrich_classifier(
     print("Classifier enriched with optimal stage thresholds.\n")
 
     # Save the updated classifier
-    save_pickle_obj(classifier, "full_trained_classifier.pkl")
+    PickleUtils.save_pickle_obj(classifier, "full_trained_classifier.pkl")
 
 
 if __name__ == "__main__":
