@@ -7,7 +7,7 @@ import os
 import numpy as np
 from PIL import Image
 
-FACE_PATH = "image_manager/training_set/face"
+FACE_PATH = "image_manager/training_set/face/cropped"
 NOT_FACE_PATH = "image_manager/training_set/not_face"
 
 

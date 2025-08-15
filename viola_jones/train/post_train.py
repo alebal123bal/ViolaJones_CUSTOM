@@ -70,14 +70,54 @@ def cascade_prediction(
     return True, voted_sum_arr
 
 
+def save_full_classifier(haar_features):
+    """
+    Save the full classifier with Haar features.
+    """
+
+    my_classifier = []
+
+    vanilla_classifier = PickleUtils.load_pickle_obj(
+        "_pickle_folder/trained_classifier.pkl"
+    )
+
+    for stage in vanilla_classifier:
+        stage_haar_features = []
+        for feature_dict in stage:
+            # Retrieve the Haar feature object using the index
+            feature = haar_features[feature_dict["feature_idx"]]
+
+            # Append the feature information along with the feature object
+            stage_haar_features.append(
+                {
+                    "feature_idx": feature_dict["feature_idx"],
+                    "threshold": feature_dict["threshold"],
+                    "direction": feature_dict["direction"],
+                    "error": feature_dict["error"],
+                    "alpha": feature_dict["alpha"],
+                    "feature": feature,
+                }
+            )
+        my_classifier.append({"stage_thre": 0.0, "stage_features": stage_haar_features})
+
+    PickleUtils.save_pickle_obj(
+        my_classifier,
+        "full_trained_classifier.pkl",
+    )
+
+
 def enrich_classifier(
+    haar_features,
     face_images=None,
-    classifier=None,
     std_devs=1.5,
 ):
     """
     Enrich the classifier with the optimal stage thresholds.
     """
+
+    # Add Haar features to the classifier
+    save_full_classifier(haar_features)
+
     print("\nEnriching classifier with optimal stage thresholds...")
 
     # Load face images if not provided
@@ -87,12 +127,10 @@ def enrich_classifier(
     # Compute integral images for face images
     integral_images = compute_integral_images(face_images)
 
-    # Load the classifier if not provided
-    if classifier is None:
-        # Load the trained classifier from a pickle file
-        classifier = PickleUtils.load_pickle_obj(
-            "_pickle_folder/full_trained_classifier.pkl"
-        )
+    # Load the trained classifier from a pickle file
+    classifier = PickleUtils.load_pickle_obj(
+        "_pickle_folder/full_trained_classifier.pkl"
+    )
 
     predictions = []
     for grayscale_image, integral_image in zip(face_images, integral_images):
@@ -123,7 +161,3 @@ def enrich_classifier(
 
     # Save the updated classifier
     PickleUtils.save_pickle_obj(classifier, "full_trained_classifier.pkl")
-
-
-if __name__ == "__main__":
-    enrich_classifier()

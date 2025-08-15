@@ -18,7 +18,7 @@ from matrix_creator.feature_eval_matrix_maker import (
 from AdaBoost_smart.classifiers.adaboost_trainer import AdaBoostTrainer
 from AdaBoost_smart.classifiers.classifier_score_check import ClassifierScoreCheck
 from AdaBoost_smart.utils.io_operations import PickleUtils
-from viola_jones.train.optim_stage_thre_train import enrich_classifier
+from viola_jones.train.post_train import save_full_classifier, enrich_classifier
 
 if __name__ == "__main__":
     start_time = time.time()
@@ -108,38 +108,10 @@ if __name__ == "__main__":
 
     classifier_score.analyze()
 
-    # Save the trained classifier with the feature objects too
-    my_classifier = []
-
-    # TODO: move this inside the optim_stage_thre_train and rename that module into classifier_utils
-    for stage in PickleUtils.load_pickle_obj("_pickle_folder/trained_classifier.pkl"):
-        stage_haar_features = []
-        for feature_dict in stage:
-            # Retrieve the Haar feature object using the index
-            feature = haar_features[feature_dict["feature_idx"]]
-
-            # Append the feature information along with the feature object
-            stage_haar_features.append(
-                {
-                    "feature_idx": feature_dict["feature_idx"],
-                    "threshold": feature_dict["threshold"],
-                    "direction": feature_dict["direction"],
-                    "error": feature_dict["error"],
-                    "alpha": feature_dict["alpha"],
-                    "feature": feature,
-                }
-            )
-        my_classifier.append({"stage_thre": 0.0, "stage_features": stage_haar_features})
-
-    PickleUtils.save_pickle_obj(
-        my_classifier,
-        "full_trained_classifier.pkl",
-    )
-
     # Enrich the classifier with stage thresholds
     enrich_classifier(
+        haar_features=haar_features,
         face_images=face_images,
-        classifier=my_classifier,
         std_devs=1.5,
     )
 

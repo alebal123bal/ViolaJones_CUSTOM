@@ -112,22 +112,6 @@
             "stopOnEntry": false
         },
         {
-            "name": "Debug Optim Threshold",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "viola_jones.train.optim_stage_thre_train",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Run Optim Threshold",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "viola_jones.train.optim_stage_thre_train",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "stopOnEntry": false
-        },
-        {
             "name": "Debug Window Slide",
             "type": "debugpy",
             "request": "launch",
