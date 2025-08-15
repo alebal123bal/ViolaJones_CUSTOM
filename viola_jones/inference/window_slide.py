@@ -18,8 +18,7 @@ from image_manager.image_loader.image_loader import (
     NOT_FACE_PATH,
 )
 
-from AdaBoost_smart.adaboost import load_pickle_obj
-
+from AdaBoost_smart.utils.io_operations import PickleUtils
 
 # IMAGE_PATH = "viola_jones/inference/test_image/easy.png"
 IMAGE_PATH = "viola_jones/inference/test_image/medium.png"
@@ -135,7 +134,9 @@ def window_slide(image_path: str, classifier_path: str):
     test_image = load_image_as_array(os.path.join(cwd, image_path))
 
     # Load the trained classifier
-    adaboost_classifier = load_pickle_obj(os.path.join(cwd, classifier_path))
+    adaboost_classifier = PickleUtils.load_pickle_obj(
+        os.path.join(cwd, classifier_path)
+    )
 
     # Preallocate a list to store the coordinates of detected faces
     detected_faces = []
@@ -144,9 +145,8 @@ def window_slide(image_path: str, classifier_path: str):
         # 1.0,
         # 2.0,
         # 4.0,
-        # 5.0,
+        5.0,
         # 6.0,
-        6.8,
         # 7.0,
         # 8.0,
         # 9.0,
