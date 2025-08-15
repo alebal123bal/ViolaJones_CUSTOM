@@ -57,13 +57,11 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Run Nonface Creator",
+            "name": "Debug Face Creator",
             "type": "debugpy",
             "request": "launch",
-            "module": "image_manager.dataset_creator.nonface_dataset_creator",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "stopOnEntry": false
+            "module": "image_manager.dataset_creator.face_dataset_creator",
+            "console": "integratedTerminal"
         },
         {
             "name": "Debug Image Loader",
