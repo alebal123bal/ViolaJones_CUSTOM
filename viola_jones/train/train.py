@@ -18,7 +18,7 @@ from matrix_creator.feature_eval_matrix_maker import (
 from AdaBoost_smart.classifiers.adaboost_trainer import AdaBoostTrainer
 from AdaBoost_smart.classifiers.classifier_score_check import ClassifierScoreCheck
 from AdaBoost_smart.utils.io_operations import PickleUtils
-from viola_jones.train.post_train import save_full_classifier, enrich_classifier
+from viola_jones.train.post_train import enrich_classifier
 
 if __name__ == "__main__":
     start_time = time.time()
