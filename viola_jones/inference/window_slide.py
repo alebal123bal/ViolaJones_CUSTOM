@@ -5,6 +5,8 @@ This module performs face detection on test images using a trained Viola-Jones c
 It implements multi-scale sliding window detection with Non-Maximum Suppression filtering.
 """
 
+# pylint: disable=all
+
 import os
 from dataclasses import dataclass
 from typing import List, Tuple, Optional, Dict, Any
@@ -30,10 +32,8 @@ class DetectionConfig:
 
     # Test image paths (uncomment the one you want to use)
     IMAGE_PATHS = {
-        "easy": "viola_jones/inference/test_image/easy.png",
-        "medium": "viola_jones/inference/test_image/medium.png",
-        "medium_1": "viola_jones/inference/test_image/medium_1.png",
-        "medium_2": "viola_jones/inference/test_image/medium_2.png",
+        "easy": "viola_jones/inference/test_image/easy.jpg",
+        "medium": "viola_jones/inference/test_image/medium.jpg",
         "hard": "viola_jones/inference/test_image/hard.jpg",
         "very_hard": "viola_jones/inference/test_image/very_hard.jpg",
     }
@@ -275,8 +275,7 @@ class NonMaximumSuppression:
 
         # Sort by area (larger faces are typically better detections)
         detections_with_area = [
-            (x * y * w * h, i, (x, y, w, h))
-            for i, (x, y, w, h) in enumerate(detections)
+            (w * h, i, (x, y, w, h)) for i, (x, y, w, h) in enumerate(detections)
         ]
         detections_with_area.sort(key=lambda x: x[0], reverse=True)
 
@@ -428,8 +427,13 @@ def main():
 
     # Create configuration
     config = DetectionConfig(
-        current_image="hard",  # Change this to test different images
-        scales=[6.0, 7.0, 8.0],  # Adjust scales as needed
+        current_image="medium",
+        scales=[
+            # 7.0,
+            # 8.0,
+            10.0,
+            11.0,
+        ],
         iou_threshold=0.5,  # Adjust NMS threshold
         step_size=1,  # Adjust sliding window step
     )
