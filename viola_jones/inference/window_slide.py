@@ -9,7 +9,7 @@ It implements multi-scale sliding window detection with Non-Maximum Suppression 
 
 import os
 from dataclasses import dataclass
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Optional, Dict
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -49,6 +49,11 @@ class DetectionConfig:
     step_size: int = 1  # Sliding window step size
     scales: List[float] = None  # Multi-scale detection scales
     iou_threshold: float = 0.5  # Non-Maximum Suppression threshold
+
+    # NEW: Consensus filtering parameters
+    min_overlaps: int = 2  # Minimum overlapping neighbors
+    consensus_threshold: float = 0.3  # IoU threshold for consensus
+    enable_consensus: bool = True  # Whether to use consensus filtering
 
     def __post_init__(self):
         """Set default scales if not provided."""
@@ -221,6 +226,53 @@ class MultiScaleDetector:
                     detections.append((x, y, window_size, window_size))
 
         return detections
+
+
+class ConsensusFilter:
+    """Handles consensus-based filtering to remove outlier detections."""
+
+    @staticmethod
+    def filter_by_consensus(
+        detections: List[Tuple[int, int, int, int]],
+        min_overlaps: int = 3,
+        overlap_threshold: float = 0.3,
+    ) -> List[Tuple[int, int, int, int]]:
+        """
+        Filter detections based on minimum number of overlapping neighbors.
+
+        This helps remove outlier/spurious detections by requiring that each
+        detection has at least 'min_overlaps' neighboring detections that
+        overlap with it by at least 'overlap_threshold'.
+
+        Args:
+            detections: List of bounding boxes [(x, y, w, h), ...]
+            min_overlaps: Minimum number of overlapping neighbors required
+            overlap_threshold: Minimum IoU for considering detections as overlapping
+
+        Returns:
+            Filtered list of detections with sufficient consensus
+        """
+        if len(detections) <= min_overlaps:
+            # If we don't have enough detections, either return all or none
+            return detections if len(detections) >= min_overlaps else []
+
+        consensus_detections = []
+
+        for i, detection in enumerate(detections):
+            overlap_count = 0
+
+            # Count how many other detections overlap with this one
+            for j, other_detection in enumerate(detections):
+                if i != j:  # Don't compare with itself
+                    iou = NonMaximumSuppression.compute_iou(detection, other_detection)
+                    if iou >= overlap_threshold:
+                        overlap_count += 1
+
+            # Keep detection if it has enough overlapping neighbors
+            if overlap_count >= min_overlaps:
+                consensus_detections.append(detection)
+
+        return consensus_detections
 
 
 class NonMaximumSuppression:
@@ -399,10 +451,25 @@ class FaceDetectionPipeline:
         print("Step 1: Multi-scale sliding window detection...")
         raw_detections = self.detector.detect_faces(image_path)
 
+        # 🆕 NEW STEP: Consensus filtering
+        if self.config.enable_consensus and len(raw_detections) > 0:
+            print("Step 1.5: Filtering by minimum overlapping detections...")
+            consensus_detections = ConsensusFilter.filter_by_consensus(
+                raw_detections,
+                min_overlaps=self.config.min_overlaps,
+                overlap_threshold=self.config.consensus_threshold,
+            )
+            print(
+                f"Consensus filtering: {len(raw_detections)} → {len(consensus_detections)} detections"
+            )
+        else:
+            consensus_detections = raw_detections
+            print("Step 1.5: Skipping consensus filtering")
+
         # Step 2: Non-Maximum Suppression
         print("Step 2: Applying Non-Maximum Suppression...")
         filtered_detections = NonMaximumSuppression.filter_detections(
-            raw_detections, self.config.iou_threshold
+            consensus_detections, self.config.iou_threshold
         )
         print(f"Filtered detections: {len(filtered_detections)}")
 
@@ -427,15 +494,22 @@ def main():
 
     # Create configuration
     config = DetectionConfig(
-        current_image="medium",
+        current_image="medium",  # Change to desired test image
         scales=[
-            # 7.0,
-            # 8.0,
-            10.0,
-            11.0,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
         ],
         iou_threshold=0.5,  # Adjust NMS threshold
         step_size=1,  # Adjust sliding window step
+        # 🆕 NEW: Consensus filtering parameters
+        min_overlaps=2,  # Require at least 2 overlapping neighbors
+        consensus_threshold=0.85,  # 85% overlap threshold
+        enable_consensus=True,  # Enable consensus filtering
     )
 
     # Create and run pipeline
