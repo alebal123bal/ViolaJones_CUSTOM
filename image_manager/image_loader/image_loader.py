@@ -11,7 +11,7 @@ FACE_PATH = "image_manager/training_set/face/cropped"
 NOT_FACE_PATH = "image_manager/training_set/not_face"
 
 
-def load_image_as_array(image_path):
+def load_image_as_array(image_path, use_gray=True):
     """
     Load an image from a given path and convert it to a grayscale numpy array.
 
@@ -22,7 +22,9 @@ def load_image_as_array(image_path):
         np.ndarray: Grayscale image as a 2D numpy array.
     """
     try:
-        img = Image.open(image_path).convert("L")  # Convert to grayscale
+        img = Image.open(image_path)
+        if use_gray:
+            img = img.convert("L")  # Convert to grayscale
         img_array = np.array(img)
         return img_array
     except FileNotFoundError as e:
