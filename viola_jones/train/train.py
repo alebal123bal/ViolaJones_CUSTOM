@@ -63,10 +63,10 @@ if __name__ == "__main__":
 
     haar_features = haar_features_0 + haar_features_1 + haar_features_2
 
-    # Load face images from the dataset folder and limit to a images
+    # Load face images from the dataset folder
     face_images = load_images_from_folder(FACE_PATH)
 
-    # Load non-face images from the dataset folder and limit to b images
+    # Load non-face images from the dataset folder
     not_face_images = load_images_from_folder(NOT_FACE_PATH)
 
     # Compute integral images for both face and non-face images
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         sample_labels=labels,
         n_stages=5,
         aggressivness=0.4,
-        feature_per_stage=3,
+        feature_per_stage=4,
     )
 
     # Train the classifier
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     enrich_classifier(
         haar_features=haar_features,
         face_images=face_images,
-        std_devs=1.5,
+        std_devs=1.75,
     )
 
     # Visualize the best features
