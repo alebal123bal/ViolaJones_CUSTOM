@@ -32,10 +32,12 @@ class DetectionConfig:
 
     # Test image paths (uncomment the one you want to use)
     IMAGE_PATHS = {
+        "very_easy": "viola_jones/inference/test_image/very_easy.jpg",
         "easy": "viola_jones/inference/test_image/easy.jpg",
         "medium": "viola_jones/inference/test_image/medium.jpg",
         "hard": "viola_jones/inference/test_image/hard.jpg",
         "very_hard": "viola_jones/inference/test_image/very_hard.jpg",
+        "final_boss": "viola_jones/inference/test_image/final_boss.jpg",
     }
 
     # Current test image
@@ -197,7 +199,7 @@ class MultiScaleDetector:
         """
         detections = []
         window_size = int(self.config.window_size * scale)
-        step_size = int(self.config.step_size * scale)
+        step_size = int(self.config.step_size * scale * 0.5)
 
         # Sliding window over image
         for y in range(0, image.shape[0] - window_size + 1, step_size):
@@ -205,7 +207,9 @@ class MultiScaleDetector:
 
                 # Extract and resize window
                 window = image[y : y + window_size, x : x + window_size]
-                resized_window = window[:: int(scale), :: int(scale)]
+                resized_window = window[
+                    :: int(scale), :: int(scale)
+                ]  # TODO: improve downsampling
 
                 # Ensure window is exactly 22x22
                 if resized_window.shape != (
@@ -361,6 +365,7 @@ class ResultVisualizer:
         image_path: str,
         detections: List[Tuple[int, int, int, int]],
         title: str = "Face Detection Results",
+        use_gray: bool = True,
     ) -> None:
         """
         Visualize face detections on the original image.
@@ -372,11 +377,14 @@ class ResultVisualizer:
         """
         # Load original image
         cwd = os.getcwd()
-        image = load_image_as_array(os.path.join(cwd, image_path))
+        image = load_image_as_array(os.path.join(cwd, image_path), use_gray=use_gray)
 
         # Create visualization
         fig, ax = plt.subplots(1, 1, figsize=(12, 8))
-        ax.imshow(image, cmap="gray")
+        if use_gray:
+            ax.imshow(image, cmap="gray")
+        else:
+            ax.imshow(image)
 
         # Draw bounding boxes
         colors = plt.cm.Set3(np.linspace(0, 1, len(detections)))
@@ -451,9 +459,13 @@ class FaceDetectionPipeline:
         print("Step 1: Multi-scale sliding window detection...")
         raw_detections = self.detector.detect_faces(image_path)
 
+        # Intermediate results
+        print("Step 1.1: Visualizing raw results...")
+        ResultVisualizer.visualize_detections(image_path, raw_detections)
+
         # 🆕 NEW STEP: Consensus filtering
         if self.config.enable_consensus and len(raw_detections) > 0:
-            print("Step 1.5: Filtering by minimum overlapping detections...")
+            print("Step 1.2: Filtering by minimum overlapping detections...")
             consensus_detections = ConsensusFilter.filter_by_consensus(
                 raw_detections,
                 min_overlaps=self.config.min_overlaps,
@@ -464,7 +476,11 @@ class FaceDetectionPipeline:
             )
         else:
             consensus_detections = raw_detections
-            print("Step 1.5: Skipping consensus filtering")
+            print("Step 1.2: Skipping consensus filtering")
+
+        # Intermediate results
+        print("Step 1.9: Visualizing consensus results...")
+        ResultVisualizer.visualize_detections(image_path, consensus_detections)
 
         # Step 2: Non-Maximum Suppression
         print("Step 2: Applying Non-Maximum Suppression...")
@@ -474,8 +490,10 @@ class FaceDetectionPipeline:
         print(f"Filtered detections: {len(filtered_detections)}")
 
         # Step 3: Visualization
-        print("Step 3: Visualizing results...")
-        ResultVisualizer.visualize_detections(image_path, filtered_detections)
+        print("Step 3: Visualizing colorized results...")
+        ResultVisualizer.visualize_detections(
+            image_path, filtered_detections, use_gray=False
+        )
 
         print("=" * 60)
         print("DETECTION COMPLETE")
@@ -494,21 +512,22 @@ def main():
 
     # Create configuration
     config = DetectionConfig(
-        current_image="medium",  # Change to desired test image
+        current_image="final_boss",  # Change to desired test image
         scales=[
+            4,
             5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
+            # 6,
+            # 7,
+            # 8,
+            # 9,
+            # 10,
+            # 11,
         ],
-        iou_threshold=0.5,  # Adjust NMS threshold
+        iou_threshold=0.2,  # Adjust NMS threshold
         step_size=1,  # Adjust sliding window step
         # 🆕 NEW: Consensus filtering parameters
-        min_overlaps=2,  # Require at least 2 overlapping neighbors
-        consensus_threshold=0.85,  # 85% overlap threshold
+        min_overlaps=4,  # Require at least 4 overlapping neighbors
+        consensus_threshold=0.70,  # 70% overlap threshold
         enable_consensus=True,  # Enable consensus filtering
     )
 
