@@ -233,6 +233,36 @@ class MultiScaleDetector:
         return detections
 
 
+class DetectionConfidence:
+    """Handles confidence scoring for detections."""
+
+    @staticmethod
+    def compute_detection_confidence(stage_votes: np.ndarray) -> Dict[str, float]:
+        """
+        Compute multiple confidence metrics from stage votes.
+
+        Args:
+            stage_votes: Array of stage votes from cascade
+
+        Returns:
+            Dictionary with various confidence metrics
+        """
+        return {
+            # Total confidence (sum of all stage votes)
+            "total_confidence": np.sum(stage_votes),
+            # Average stage confidence
+            "avg_confidence": np.mean(stage_votes),
+            # Minimum stage confidence (weakest link)
+            "min_confidence": np.min(stage_votes),
+            # Confidence consistency (lower std = more consistent)
+            "consistency": 1.0 / (1.0 + np.std(stage_votes)),
+            # Final stage confidence (most discriminative)
+            "final_stage_confidence": stage_votes[-1],
+            # Confidence margin over thresholds
+            "margin_strength": np.mean(stage_votes) * len(stage_votes),
+        }
+
+
 class IntersectionOverUnion:
     """Handles Intersection over Union (IoU) calculations."""
 
@@ -375,7 +405,7 @@ class ResultVisualizer:
     @staticmethod
     def visualize_detections(
         image_path: str,
-        detections: List[Tuple[int, int, int, int]],
+        detections: List[Tuple[int, int, int, int, np.ndarray]],
         title: str = "Face Detection Results",
         use_gray: bool = True,
     ) -> None:
@@ -384,7 +414,7 @@ class ResultVisualizer:
 
         Args:
             image_path: Path to the original image
-            detections: List of bounding boxes to visualize
+            detections: List of bounding boxes with stage votes
             title: Plot title
         """
         # Load original image
@@ -415,6 +445,63 @@ class ResultVisualizer:
                 x,
                 y - 5,
                 f"Face {i+1}",
+                color=color,
+                fontweight="bold",
+                fontsize=10,
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.7),
+            )
+
+        ax.set_title(f"{title} - {len(detections)} faces detected", fontsize=14)
+        ax.axis("off")
+        plt.tight_layout()
+        plt.show()
+
+        print(f"Visualization complete. {len(detections)} faces detected.")
+
+    @staticmethod
+    def visualize_detections_with_confidence(
+        image_path: str,
+        detections: List[Tuple[int, int, int, int, np.ndarray]],
+        title: str = "Face Detection Results",
+        use_gray: bool = True,
+    ) -> None:
+        """
+        Visualize face detections on the original image with confidence scores.
+
+        Args:
+            image_path: Path to the original image
+            detections: List of bounding boxes with stage votes
+            title: Plot title
+        """
+        # Load original image
+        cwd = os.getcwd()
+        image = load_image_as_array(os.path.join(cwd, image_path), use_gray=use_gray)
+
+        # Create visualization
+        fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+        if use_gray:
+            ax.imshow(image, cmap="gray")
+        else:
+            ax.imshow(image)
+
+        # Draw bounding boxes
+        colors = plt.cm.Set3(np.linspace(0, 1, len(detections)))
+
+        for i, (x, y, w, h, stage_votes) in enumerate(detections):
+            color = colors[i] if len(detections) > 1 else "red"
+
+            # Draw rectangle
+            rect = patches.Rectangle(
+                (x, y), w, h, linewidth=2, edgecolor=color, facecolor="none"
+            )
+            ax.add_patch(rect)
+
+            # Add label with confidence
+            confidence = DetectionConfidence.compute_detection_confidence(stage_votes)
+            ax.text(
+                x,
+                y - 5,
+                f"Face {i+1}: {confidence['total_confidence']:.2f}",
                 color=color,
                 fontweight="bold",
                 fontsize=10,
@@ -473,7 +560,9 @@ class FaceDetectionPipeline:
 
         # Intermediate results
         print("Step 1: Visualizing raw results...")
-        ResultVisualizer.visualize_detections(image_path, raw_detections)
+        ResultVisualizer.visualize_detections_with_confidence(
+            image_path, raw_detections
+        )
 
         # Step 2: Consensus filtering
         print("Step 2: Filtering by minimum overlapping detections...")
@@ -488,7 +577,9 @@ class FaceDetectionPipeline:
 
         # Intermediate results
         print("Step 2: Visualizing consensus results...")
-        ResultVisualizer.visualize_detections(image_path, consensus_detections)
+        ResultVisualizer.visualize_detections_with_confidence(
+            image_path, consensus_detections
+        )
 
         # Step 3: Non-Maximum Suppression
         print("Step 3: Applying Non-Maximum Suppression...")
@@ -499,7 +590,7 @@ class FaceDetectionPipeline:
 
         # Step 4: Visualization
         print("Step 4: Visualizing colorized results...")
-        ResultVisualizer.visualize_detections(
+        ResultVisualizer.visualize_detections_with_confidence(
             image_path, filtered_detections, use_gray=False
         )
 
