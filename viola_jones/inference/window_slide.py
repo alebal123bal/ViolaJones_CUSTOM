@@ -21,11 +21,6 @@ from image_manager.image_loader.image_loader import (
 from AdaBoost_smart.utils.io_operations import PickleUtils
 
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
-
-
 @dataclass
 class DetectionConfig:
     """Configuration parameters for face detection."""
@@ -67,11 +62,6 @@ class DetectionConfig:
     def image_path(self) -> str:
         """Get the current image path."""
         return self.IMAGE_PATHS[self.current_image]
-
-
-# ============================================================================
-# CORE DETECTION CLASSES
-# ============================================================================
 
 
 class CascadeClassifier:
@@ -501,7 +491,7 @@ class ResultVisualizer:
             ax.text(
                 x,
                 y - 5,
-                f"Face {i+1}: {confidence['total_confidence']:.2f}",
+                f"Face {confidence['total_confidence']:.2f}",
                 color=color,
                 fontweight="bold",
                 fontsize=10,
@@ -514,11 +504,6 @@ class ResultVisualizer:
         plt.show()
 
         print(f"Visualization complete. {len(detections)} faces detected.")
-
-
-# ============================================================================
-# MAIN FACE DETECTION PIPELINE
-# ============================================================================
 
 
 class FaceDetectionPipeline:
@@ -599,11 +584,6 @@ class FaceDetectionPipeline:
         print("=" * 60)
 
         return filtered_detections
-
-
-# ============================================================================
-# MAIN EXECUTION
-# ============================================================================
 
 
 def main():
