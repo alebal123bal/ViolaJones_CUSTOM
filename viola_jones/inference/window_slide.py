@@ -50,12 +50,13 @@ class DetectionConfig:
     window_size: int = 22  # Base window size (22x22 pixels)
     step_size: int = 1  # Sliding window step size
     scales: List[float] = None  # Multi-scale detection scales
-    iou_threshold: float = 0.5  # Non-Maximum Suppression threshold
 
-    # NEW: Consensus filtering parameters
+    # Consensus filtering parameters
     min_overlaps: int = 2  # Minimum overlapping neighbors
     consensus_threshold: float = 0.3  # IoU threshold for consensus
-    enable_consensus: bool = True  # Whether to use consensus filtering
+
+    # Non-Maximum Suppression parameters
+    iou_threshold: float = 0.5  # Non-Maximum Suppression threshold
 
     def __post_init__(self):
         """Set default scales if not provided."""
@@ -460,37 +461,33 @@ class FaceDetectionPipeline:
         raw_detections = self.detector.detect_faces(image_path)
 
         # Intermediate results
-        print("Step 1.1: Visualizing raw results...")
+        print("Step 1: Visualizing raw results...")
         ResultVisualizer.visualize_detections(image_path, raw_detections)
 
-        # 🆕 NEW STEP: Consensus filtering
-        if self.config.enable_consensus and len(raw_detections) > 0:
-            print("Step 1.2: Filtering by minimum overlapping detections...")
-            consensus_detections = ConsensusFilter.filter_by_consensus(
-                raw_detections,
-                min_overlaps=self.config.min_overlaps,
-                overlap_threshold=self.config.consensus_threshold,
-            )
-            print(
-                f"Consensus filtering: {len(raw_detections)} → {len(consensus_detections)} detections"
-            )
-        else:
-            consensus_detections = raw_detections
-            print("Step 1.2: Skipping consensus filtering")
+        # Step 2: Consensus filtering
+        print("Step 2: Filtering by minimum overlapping detections...")
+        consensus_detections = ConsensusFilter.filter_by_consensus(
+            raw_detections,
+            min_overlaps=self.config.min_overlaps,
+            overlap_threshold=self.config.consensus_threshold,
+        )
+        print(
+            f"Consensus filtering: {len(raw_detections)} → {len(consensus_detections)} detections"
+        )
 
         # Intermediate results
-        print("Step 1.9: Visualizing consensus results...")
+        print("Step 2: Visualizing consensus results...")
         ResultVisualizer.visualize_detections(image_path, consensus_detections)
 
-        # Step 2: Non-Maximum Suppression
-        print("Step 2: Applying Non-Maximum Suppression...")
+        # Step 3: Non-Maximum Suppression
+        print("Step 3: Applying Non-Maximum Suppression...")
         filtered_detections = NonMaximumSuppression.filter_detections(
             consensus_detections, self.config.iou_threshold
         )
         print(f"Filtered detections: {len(filtered_detections)}")
 
-        # Step 3: Visualization
-        print("Step 3: Visualizing colorized results...")
+        # Step 4: Visualization
+        print("Step 4: Visualizing colorized results...")
         ResultVisualizer.visualize_detections(
             image_path, filtered_detections, use_gray=False
         )
@@ -525,10 +522,9 @@ def main():
         ],
         iou_threshold=0.2,  # Adjust NMS threshold
         step_size=1,  # Adjust sliding window step
-        # 🆕 NEW: Consensus filtering parameters
+        # Consensus filtering parameters
         min_overlaps=4,  # Require at least 4 overlapping neighbors
         consensus_threshold=0.70,  # 70% overlap threshold
-        enable_consensus=True,  # Enable consensus filtering
     )
 
     # Create and run pipeline
