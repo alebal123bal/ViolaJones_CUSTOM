@@ -298,15 +298,14 @@ class ConsensusFilter:
         consensus_detections = []
 
         for i, detection in enumerate(detections):
-            detection_coords = detection[:4]  # (x, y, w, h)
             overlap_count = 0
 
             # Count how many other detections overlap with this one
             for j, other_detection in enumerate(detections):
-                other_detection_coords = other_detection[:4]  # (x, y, w, h)
                 if i != j:  # Don't compare with itself
                     iou = IntersectionOverUnion.compute_iou(
-                        detection_coords, other_detection_coords
+                        detection[:4],  # (x, y, w, h)
+                        other_detection[:4],  # (x, y, w, h)
                     )
                     if iou >= overlap_threshold:
                         overlap_count += 1
