@@ -187,7 +187,7 @@ class MultiScaleDetector:
 
     def _detect_at_scale(
         self, image: np.ndarray, scale: float
-    ) -> List[Tuple[int, int, int, int]]:
+    ) -> List[Tuple[int, int, int, int, np.ndarray]]:
         """
         Perform detection at a single scale.
 
@@ -196,7 +196,7 @@ class MultiScaleDetector:
             scale: Detection scale
 
         Returns:
-            List of detections at this scale
+            List of detections at this scale with stage votes
         """
         detections = []
         window_size = int(self.config.window_size * scale)
@@ -223,14 +223,48 @@ class MultiScaleDetector:
                 integral_window = compute_integral_image(resized_window)
 
                 # Classify window
-                is_face, _ = CascadeClassifier.predict_window(
+                is_face, stage_votes = CascadeClassifier.predict_window(
                     self.classifier, resized_window, integral_window, x, y
                 )
 
                 if is_face:
-                    detections.append((x, y, window_size, window_size))
+                    detections.append((x, y, window_size, window_size, stage_votes))
 
         return detections
+
+
+class IntersectionOverUnion:
+    """Handles Intersection over Union (IoU) calculations."""
+
+    @staticmethod
+    def compute_iou(
+        box1: Tuple[int, int, int, int], box2: Tuple[int, int, int, int]
+    ) -> float:
+        """
+        Compute Intersection over Union (IoU) of two bounding boxes.
+
+        Args:
+            box1, box2: Bounding boxes in format (x, y, width, height)
+
+        Returns:
+            IoU value between 0.0 and 1.0
+        """
+        x1, y1, w1, h1 = box1
+        x2, y2, w2, h2 = box2
+
+        # Calculate intersection
+        x_left = max(x1, x2)
+        y_top = max(y1, y2)
+        x_right = min(x1 + w1, x2 + w2)
+        y_bottom = min(y1 + h1, y2 + h2)
+
+        if x_left >= x_right or y_top >= y_bottom:
+            return 0.0
+
+        intersection = (x_right - x_left) * (y_bottom - y_top)
+        union = (w1 * h1) + (w2 * h2) - intersection
+
+        return intersection / union if union > 0 else 0.0
 
 
 class ConsensusFilter:
@@ -264,12 +298,16 @@ class ConsensusFilter:
         consensus_detections = []
 
         for i, detection in enumerate(detections):
+            detection_coords = detection[:4]  # (x, y, w, h)
             overlap_count = 0
 
             # Count how many other detections overlap with this one
             for j, other_detection in enumerate(detections):
+                other_detection_coords = other_detection[:4]  # (x, y, w, h)
                 if i != j:  # Don't compare with itself
-                    iou = NonMaximumSuppression.compute_iou(detection, other_detection)
+                    iou = IntersectionOverUnion.compute_iou(
+                        detection_coords, other_detection_coords
+                    )
                     if iou >= overlap_threshold:
                         overlap_count += 1
 
@@ -284,39 +322,10 @@ class NonMaximumSuppression:
     """Handles Non-Maximum Suppression filtering."""
 
     @staticmethod
-    def compute_iou(
-        box1: Tuple[int, int, int, int], box2: Tuple[int, int, int, int]
-    ) -> float:
-        """
-        Compute Intersection over Union (IoU) of two bounding boxes.
-
-        Args:
-            box1, box2: Bounding boxes in format (x, y, width, height)
-
-        Returns:
-            IoU value between 0.0 and 1.0
-        """
-        x1, y1, w1, h1 = box1
-        x2, y2, w2, h2 = box2
-
-        # Calculate intersection
-        x_left = max(x1, x2)
-        y_top = max(y1, y2)
-        x_right = min(x1 + w1, x2 + w2)
-        y_bottom = min(y1 + h1, y2 + h2)
-
-        if x_left >= x_right or y_top >= y_bottom:
-            return 0.0
-
-        intersection = (x_right - x_left) * (y_bottom - y_top)
-        union = (w1 * h1) + (w2 * h2) - intersection
-
-        return intersection / union if union > 0 else 0.0
-
-    @staticmethod
     def filter_detections(
-        detections: List[Tuple[int, int, int, int]], iou_threshold: float = 0.5
-    ) -> List[Tuple[int, int, int, int]]:
+        detections: List[Tuple[int, int, int, int, np.ndarray]],
+        iou_threshold: float = 0.5,
+    ) -> List[Tuple[int, int, int, int, np.ndarray]]:
         """
         Apply Non-Maximum Suppression to filter overlapping detections.
 
@@ -332,7 +341,8 @@ class NonMaximumSuppression:
 
         # Sort by area (larger faces are typically better detections)
         detections_with_area = [
-            (w * h, i, (x, y, w, h)) for i, (x, y, w, h) in enumerate(detections)
+            (w * h, i, (x, y, w, h, stage_votes))
+            for i, (x, y, w, h, stage_votes) in enumerate(detections)
         ]
         detections_with_area.sort(key=lambda x: x[0], reverse=True)
 
@@ -351,7 +361,9 @@ class NonMaximumSuppression:
                 if other_idx == idx or other_idx in suppressed_indices:
                     continue
 
-                iou = NonMaximumSuppression.compute_iou(detection, other_detection)
+                iou = IntersectionOverUnion.compute_iou(
+                    detection[:4], other_detection[:4]
+                )
                 if iou > iou_threshold:
                     suppressed_indices.add(other_idx)
 
@@ -390,7 +402,7 @@ class ResultVisualizer:
         # Draw bounding boxes
         colors = plt.cm.Set3(np.linspace(0, 1, len(detections)))
 
-        for i, (x, y, w, h) in enumerate(detections):
+        for i, (x, y, w, h, stage_votes) in enumerate(detections):
             color = colors[i] if len(detections) > 1 else "red"
 
             # Draw rectangle
@@ -533,8 +545,10 @@ def main():
     try:
         final_detections = pipeline.run_detection()
         print(f"\nFinal Results:")
-        for i, (x, y, w, h) in enumerate(final_detections):
-            print(f"  Face {i+1}: x={x}, y={y}, w={w}, h={h}")
+        for i, (x, y, w, h, stage_votes) in enumerate(final_detections):
+            print(
+                f"  Face {i+1}: x={x}, y={y}, w={w}, h={h}, stage_votes={stage_votes}"
+            )
 
     except Exception as e:
         print(f"Error during detection: {e}")
