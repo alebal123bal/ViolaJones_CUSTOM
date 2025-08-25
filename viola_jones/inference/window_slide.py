@@ -36,7 +36,7 @@ class DetectionConfig:
     }
 
     # Current test image
-    current_image: str = "hard"
+    current_image: str = "final_boss"
 
     # Classifier path
     classifier_path: str = "_pickle_folder/full_trained_classifier.pkl"
@@ -145,7 +145,9 @@ class MultiScaleDetector:
         self.classifier = PickleUtils.load_pickle_obj(classifier_path)
         print(f"Loaded classifier from: {classifier_path}")
 
-    def detect_faces(self, image_path: str) -> List[Tuple[int, int, int, int]]:
+    def detect_faces(
+        self, image_path: str
+    ) -> List[Tuple[int, int, int, int, np.ndarray]]:
         """
         Perform multi-scale face detection on an image.
 
@@ -153,7 +155,7 @@ class MultiScaleDetector:
             image_path: Path to the input image
 
         Returns:
-            List of detected face bounding boxes [(x, y, w, h), ...]
+            List of detected face bounding boxes and their corresponding stage votes
         """
         if self.classifier is None:
             self.load_classifier()
@@ -186,7 +188,7 @@ class MultiScaleDetector:
             scale: Detection scale
 
         Returns:
-            List of detections at this scale with stage votes
+            List of detected face bounding boxes and their corresponding stage votes
         """
         detections = []
         window_size = int(self.config.window_size * scale)
@@ -292,10 +294,10 @@ class ConsensusFilter:
 
     @staticmethod
     def filter_by_consensus(
-        detections: List[Tuple[int, int, int, int]],
+        detections: List[Tuple[int, int, int, int, np.ndarray]],
         min_overlaps: int = 3,
         overlap_threshold: float = 0.3,
-    ) -> List[Tuple[int, int, int, int]]:
+    ) -> List[Tuple[int, int, int, int, np.ndarray]]:
         """
         Filter detections based on minimum number of overlapping neighbors.
 
@@ -304,12 +306,12 @@ class ConsensusFilter:
         overlap with it by at least 'overlap_threshold'.
 
         Args:
-            detections: List of bounding boxes [(x, y, w, h), ...]
+            detections: List of bounding boxes and their corresponding stage votes
             min_overlaps: Minimum number of overlapping neighbors required
             overlap_threshold: Minimum IoU for considering detections as overlapping
 
         Returns:
-            Filtered list of detections with sufficient consensus
+            List of detected face bounding boxes and their corresponding stage votes, filtered
         """
         if len(detections) <= min_overlaps:
             # If we don't have enough detections, either return all or none
@@ -349,11 +351,11 @@ class NonMaximumSuppression:
         Apply Non-Maximum Suppression to filter overlapping detections.
 
         Args:
-            detections: List of bounding boxes [(x, y, w, h), ...]
+            detections: List of detected face bounding boxes and their corresponding stage votes
             iou_threshold: IoU threshold for suppression
 
         Returns:
-            Filtered list of non-overlapping detections
+            List of detected face bounding boxes and their corresponding stage votes, filtered
         """
         if len(detections) <= 1:
             return detections
@@ -404,7 +406,7 @@ class ResultVisualizer:
 
         Args:
             image_path: Path to the original image
-            detections: List of bounding boxes with stage votes
+            detections: List of detected face bounding boxes and their corresponding stage votes
             title: Plot title
         """
         # Load original image
@@ -460,7 +462,7 @@ class ResultVisualizer:
 
         Args:
             image_path: Path to the original image
-            detections: List of bounding boxes with stage votes
+            detections: List of detected face bounding boxes and their corresponding stage votes
             title: Plot title
         """
         # Load original image
@@ -513,7 +515,9 @@ class FaceDetectionPipeline:
         self.config = config
         self.detector = MultiScaleDetector(config)
 
-    def run_detection(self, image_key: str = None) -> List[Tuple[int, int, int, int]]:
+    def run_detection(
+        self, image_key: str = None
+    ) -> List[Tuple[int, int, int, int, np.ndarray]]:
         """
         Run the complete face detection pipeline.
 
@@ -521,7 +525,7 @@ class FaceDetectionPipeline:
             image_key: Key for image selection (optional)
 
         Returns:
-            List of final filtered detections
+            List of detected face bounding boxes and their corresponding stage votes, filtered
         """
         # Use provided image key or default from config
         if image_key:
