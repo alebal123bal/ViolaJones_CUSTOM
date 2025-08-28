@@ -120,14 +120,21 @@ def train_model():
         std_devs=1.75,
     )
 
-    # Visualize the best features
-    for stage in PickleUtils.load_pickle_obj(
+    # Load the classifier for visualization
+    trained_classifier = PickleUtils.load_pickle_obj(
         "_pickle_folder/full_trained_classifier.pkl"
-    ):
+    )
+
+    # Visualize the top 4 best features
+    i = 0
+    for stage in trained_classifier:
+        if i >= 4:
+            break
         stage_features = stage["stage_features"]
         for feature_dict in stage_features:
             feature = feature_dict["feature"]
             feature.plot(grayscale_image=face_images[1])
+            i += 1
 
 
 if __name__ == "__main__":
