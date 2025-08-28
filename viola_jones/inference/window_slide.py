@@ -27,6 +27,9 @@ class DetectionConfig:
 
     # Test image paths (uncomment the one you want to use)
     IMAGE_PATHS = {
+        "license_00": "viola_jones/inference/test_image/license_00.jpg",
+        "license_01": "viola_jones/inference/test_image/license_01.jpg",
+        "license_02": "viola_jones/inference/test_image/license_02.jpg",
         "very_easy": "viola_jones/inference/test_image/very_easy.jpg",
         "easy": "viola_jones/inference/test_image/easy.jpg",
         "medium": "viola_jones/inference/test_image/medium.jpg",
@@ -593,40 +596,43 @@ class FaceDetectionPipeline:
 def main():
     """Main function to run face detection."""
 
-    # Create configuration
-    config = DetectionConfig(
-        current_image="final_boss",  # Change to desired test image
-        scales=[
-            4,
-            5,
-            # 6,
-            # 7,
-            # 8,
-            # 9,
-            # 10,
-            # 11,
-        ],
-        iou_threshold=0.2,  # Adjust NMS threshold
-        step_size=1,  # Adjust sliding window step
-        # Consensus filtering parameters
-        min_overlaps=4,  # Require at least 4 overlapping neighbors
-        consensus_threshold=0.70,  # 70% overlap threshold
-    )
+    for image in ["license_02", "final_boss"]:
 
-    # Create and run pipeline
-    pipeline = FaceDetectionPipeline(config)
+        # Create configuration
+        config = DetectionConfig(
+            current_image=image,  # Change to desired test image
+            scales=[
+                # 3,
+                4,
+                5,
+                # 6,
+                # 7,
+                # 8,
+                # 9,
+                # 10,
+                # 11,
+            ],
+            iou_threshold=0.2,  # Adjust NMS threshold
+            step_size=1,  # Adjust sliding window step
+            # Consensus filtering parameters
+            min_overlaps=4,  # Require at least 4 overlapping neighbors
+            consensus_threshold=0.65,  # 65% overlap threshold
+        )
 
-    try:
-        final_detections = pipeline.run_detection()
-        print(f"\nFinal Results:")
-        for i, (x, y, w, h, stage_votes) in enumerate(final_detections):
-            print(
-                f"  Face {i+1}: x={x}, y={y}, w={w}, h={h}, stage_votes={stage_votes}"
-            )
+        # Create and run pipeline
+        pipeline = FaceDetectionPipeline(config)
 
-    except Exception as e:
-        print(f"Error during detection: {e}")
-        raise
+        try:
+            final_detections = pipeline.run_detection()
+            print(f"\nFinal Results:")
+            for i, (x, y, w, h, stage_votes) in enumerate(final_detections):
+                print(
+                    f"  Face {i+1}: x={x}, y={y}, w={w}, h={h}, stage_votes={stage_votes}"
+                )
+
+        except Exception as e:
+            print(f"Error during detection: {e}")
+            raise
 
 
 if __name__ == "__main__":
