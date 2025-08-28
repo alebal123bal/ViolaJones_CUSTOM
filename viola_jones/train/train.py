@@ -20,7 +20,12 @@ from AdaBoost_smart.classifiers.classifier_score_check import ClassifierScoreChe
 from AdaBoost_smart.utils.io_operations import PickleUtils
 from viola_jones.train.post_train import enrich_classifier
 
-if __name__ == "__main__":
+
+def train_model():
+    """
+    Train a Viola-Jones face detection model using the optimized AdaBoost.
+    """
+
     start_time = time.time()
 
     # Generate Haar features
@@ -123,3 +128,7 @@ if __name__ == "__main__":
         for feature_dict in stage_features:
             feature = feature_dict["feature"]
             feature.plot(grayscale_image=face_images[1])
+
+
+if __name__ == "__main__":
+    train_model()
