@@ -88,12 +88,6 @@ for (x, y, w, h) in faces:
     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
 ```
 
-## Performance
-
-- **Detection Speed**: ~30-50ms per frame (640×480) on modern hardware
-- **Accuracy**: Comparable to OpenCV's cascade classifier
-- **False Positives**: Minimized through cascade structure
-
 ## Dataset
 
 Training requires:
